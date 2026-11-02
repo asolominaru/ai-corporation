@@ -107,9 +107,26 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
             )
           })}
 
+        {/* бейдж ожидающих приёмки задач у дирекции */}
+        {tasks.some((t) => t.phase === 'approval') && (
+          <g className="packet" filter="url(#glow)">
+            <circle cx={558} cy={66} r="13" fill="hsl(43 90% 55%)" />
+            <text
+              x={558}
+              y={71}
+              textAnchor="middle"
+              fontSize="13"
+              fontWeight="800"
+              fill="hsl(222 40% 8%)"
+              fontFamily="Manrope, sans-serif"
+            >
+              {tasks.filter((t) => t.phase === 'approval').length}
+            </text>
+          </g>
+        )}
+
         {/* узлы-агенты */}
-        {AGENTS.map((agent) => {
-          const dept = DEPT_BY_ID[agent.departmentId]
+        {AGENTS.map((agent) => {          const dept = DEPT_BY_ID[agent.departmentId]
           const busy = busyByAgent[agent.id]
           const isSelected = selected === agent.id
           const x = agent.x - NODE_W / 2

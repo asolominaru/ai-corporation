@@ -42,8 +42,13 @@ interface Strings {
   logError: (agent: string, id: number, msg: string) => string
   logStageDone: (agent: string, stage: string, next: string) => string
   logTransfer: (agent: string, id: number, next: string) => string
-  logDone: (id: number, sec: string, agent: string) => string
+  logDone: (id: number, sec: string) => string
   logCleared: string
+  logAwaitApproval: (id: number, title: string) => string
+  logRework: (id: number, agent: string) => string
+  approvalTitle: string
+  approve: string
+  rework: string
   taskWord: string
 }
 
@@ -93,8 +98,13 @@ export const STRINGS: Record<Lang, Strings> = {
     logError: (agent, id, msg) => `${agent} не смог выполнить этап (задача #${id}): ${msg}`,
     logStageDone: (agent, stage, next) => `${agent} завершил «${stage}», передаёт → ${next}`,
     logTransfer: (agent, id, next) => `${agent} передаёт задачу #${id} → ${next}`,
-    logDone: (id, sec, agent) => `Задача #${id} выполнена за ${sec} с — ${agent} опубликовал результат`,
+    logDone: (id, sec) => `Задача #${id} принята CEO за ${sec} с цикла — результат опубликован`,
     logCleared: 'Журнал очищен.',
+    logAwaitApproval: (id, title) => `Задача #${id} «${title}» прошла конвейер — ждёт финальной приёмки у CEO`,
+    logRework: (id, agent) => `Задача #${id} возвращена CEO на доработку → ${agent}`,
+    approvalTitle: 'Финальная приёмка · CEO',
+    approve: 'Принять',
+    rework: 'На доработку',
     taskWord: 'Текст задачи',
   },
   en: {
@@ -142,8 +152,13 @@ export const STRINGS: Record<Lang, Strings> = {
     logError: (agent, id, msg) => `${agent} failed the stage (task #${id}): ${msg}`,
     logStageDone: (agent, stage, next) => `${agent} finished "${stage}", handing off → ${next}`,
     logTransfer: (agent, id, next) => `${agent} passes task #${id} → ${next}`,
-    logDone: (id, sec, agent) => `Task #${id} completed in ${sec}s — ${agent} published the result`,
+    logDone: (id, sec) => `Task #${id} accepted by the CEO after a ${sec}s cycle — result published`,
     logCleared: 'Log cleared.',
+    logAwaitApproval: (id, title) => `Task #${id} "${title}" passed the pipeline — awaiting final acceptance by the CEO`,
+    logRework: (id, agent) => `Task #${id} sent back by the CEO → ${agent}`,
+    approvalTitle: 'Final acceptance · CEO',
+    approve: 'Accept',
+    rework: 'Send back',
     taskWord: 'Task text',
   },
 }

@@ -20,7 +20,7 @@ export interface ActiveTask {
   route: string[]
   /** индекс агента, который сейчас работает / к которому летит пакет */
   hopIndex: number
-  phase: 'transfer' | 'work'
+  phase: 'transfer' | 'work' | 'approval'
   from: string | null
   t0: number
   duration: number
@@ -171,6 +171,11 @@ export function useCorporationSim() {
       let changed = false
       const next: ActiveTask[] = []
       for (const task of tasksRef.current) {
+        if (task.phase === 'approval') {
+          // ждёт решения CEO — таймер не трогаем
+          next.push(task)
+          continue
+        }
         const agentId = task.route[task.hopIndex]
         const agent = AGENT_BY_ID[agentId]
 
@@ -249,18 +254,10 @@ export function useCorporationSim() {
         const agent = AGENT_BY_ID[agentId]
         const S = STRINGS[langRef.current]
         if (task.hopIndex === task.route.length - 1) {
-          const total = nowMs - task.createdAt
-          durationsRef.current.push(total)
-          if (durationsRef.current.length > 30) durationsRef.current.shift()
-          const avg = Math.round(durationsRef.current.reduce((a, b) => a + b, 0) / durationsRef.current.length)
-          setMetrics((m) => ({ ...m, done: m.done + 1, avgMs: avg }))
-          lastOutputRef.current.delete(task.id)
-          pushLog({
-            agentId,
-            kind: 'done',
-            text: S.logDone(task.id, (total / 1000).toFixed(1), agent.name),
-          })
-          // задача завершена — не переносим в next
+          // последний этап пройден — задача уходит на финальную приёмку к CEO
+          changed = true
+          pushLog({ agentId, kind: 'step', text: S.logAwaitApproval(task.id, task.title) })
+          acc.push({ ...task, phase: 'approval', t0: nowMs })
         } else {
           const nextAgent = AGENT_BY_ID[task.route[task.hopIndex + 1]]
           const stageLabel = langRef.current === 'ru' ? agent.stageName : agent.stageNameEn
@@ -319,6 +316,47 @@ export function useCorporationSim() {
     }
   }
 
+  const approveTask = useCallback(
+    (taskId: number) => {
+      const task = tasksRef.current.find((t) => t.id === taskId && t.phase === 'approval')
+      if (!task) return
+      const nowMs = Date.now()
+      const total = nowMs - task.createdAt
+      durationsRef.current.push(total)
+      if (durationsRef.current.length > 30) durationsRef.current.shift()
+      const avg = Math.round(durationsRef.current.reduce((a, b) => a + b, 0) / durationsRef.current.length)
+      setMetrics((m) => ({ ...m, done: m.done + 1, avgMs: avg }))
+      lastOutputRef.current.delete(taskId)
+      tasksRef.current = tasksRef.current.filter((t) => t.id !== taskId)
+      setTasks(tasksRef.current)
+      pushLog({
+        agentId: 'rel',
+        kind: 'done',
+        text: STRINGS[langRef.current].logDone(taskId, (total / 1000).toFixed(1)),
+      })
+    },
+    [pushLog],
+  )
+
+  const rejectTask = useCallback(
+    (taskId: number) => {
+      const nowMs = Date.now()
+      const task = tasksRef.current.find((t) => t.id === taskId && t.phase === 'approval')
+      if (!task) return
+      const qaIndex = task.route.indexOf('qa')
+      const backTo = qaIndex >= 0 ? qaIndex : 1
+      const from = task.route[task.route.length - 1]
+      tasksRef.current = tasksRef.current.map((t) =>
+        t.id === taskId
+          ? { ...t, phase: 'transfer' as const, from, hopIndex: backTo, t0: nowMs, duration: TRANSFER_MS, callStarted: false }
+          : t,
+      )
+      setTasks(tasksRef.current)
+      pushLog({ agentId: null, kind: 'step', text: STRINGS[langRef.current].logRework(taskId, AGENT_BY_ID[task.route[backTo]].name) })
+    },
+    [pushLog],
+  )
+
   return {
     now,
     tasks,
@@ -332,6 +370,8 @@ export function useCorporationSim() {
     lang,
     setLang,
     launchTask,
+    approveTask,
+    rejectTask,
     busyByAgent,
     clearLog: useCallback(() => {
       setLog([{ id: idRef.current++, at: Date.now(), agentId: null, kind: 'system', text: STRINGS[langRef.current].logCleared }])
