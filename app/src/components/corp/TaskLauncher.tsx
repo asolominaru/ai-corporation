@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Bot, Pause, Play, SendHorizonal, Sparkles } from 'lucide-react'
-import { TASK_TYPES, type TaskTypeId } from '@/data/corporation'
+import { TASK_TYPES, PRODUCTS, type TaskTypeId } from '@/data/corporation'
 import type { Mode } from '@/hooks/useCorporationSim'
 import { STRINGS, type Lang } from '@/i18n'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,8 @@ interface Props {
 
 export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onModeChange, proxyOk, lang }: Props) {
   const s = STRINGS[lang]
-  const [type, setType] = useState<TaskTypeId>('research')
+  const [type, setType] = useState<TaskTypeId>('rnd')
+  const [product, setProduct] = useState<string>(PRODUCTS[0].id)
   const [title, setTitle] = useState('')
 
   const current = TASK_TYPES.find((t) => t.id === type)!
@@ -26,7 +27,11 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
   const realBlocked = mode === 'real' && proxyOk === false
 
   const submit = () => {
-    const value = title.trim() || presets[Math.floor(Math.random() * presets.length)]
+    let value = title.trim() || presets[Math.floor(Math.random() * presets.length)]
+    if (type === 'product') {
+      const p = PRODUCTS.find((x) => x.id === product)!
+      value = `${lang === 'ru' ? p.name : p.nameEn}: ${value}`
+    }
     onLaunch(value, type)
     setTitle('')
   }
@@ -82,6 +87,32 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
             </button>
           ))}
         </div>
+
+        {type === 'product' && (
+          <div
+            className="flex rounded-md border border-primary/40 bg-secondary p-0.5"
+            role="group"
+            aria-label={lang === 'ru' ? 'Продукт' : 'Product'}
+          >
+            {PRODUCTS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setProduct(p.id)}
+                aria-pressed={product === p.id}
+                className={cn(
+                  'rounded px-2.5 py-1.5 font-mono text-[11px] font-semibold transition-colors duration-150',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  product === p.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {lang === 'ru' ? p.name : p.nameEn}
+              </button>
+            ))}
+          </div>
+        )}
 
         <input
           value={title}

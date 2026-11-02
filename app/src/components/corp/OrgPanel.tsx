@@ -1,4 +1,4 @@
-import { AGENTS, DEPARTMENTS } from '@/data/corporation'
+import { AGENTS, DEPARTMENTS, CEO } from '@/data/corporation'
 import { STRINGS, type Lang } from '@/i18n'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +33,20 @@ export default function OrgPanel({ busyByAgent, selected, onSelect, lang }: Prop
                   {lang === 'ru' ? dept.name : dept.nameEn}
                 </span>
               </div>
+              {dept.id === 'dir' && (
+                <div className="mb-1 flex w-full items-center gap-2.5 rounded-md border border-primary/30 bg-primary/5 px-2.5 py-2 text-left">
+                  <span className="flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded-full border border-primary" aria-hidden="true" />
+                  <span className="min-w-0 flex-1 leading-tight">
+                    <span className="block truncate text-sm font-semibold">
+                      {lang === 'ru' ? CEO.name : CEO.nameEn}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {lang === 'ru' ? CEO.role : CEO.roleEn}
+                    </span>
+                  </span>
+                  <span className="font-mono text-[11px] text-primary">human</span>
+                </div>
+              )}
               {agents.map((agent) => {
                 const busy = busyByAgent[agent.id]
                 const isSelected = selected === agent.id

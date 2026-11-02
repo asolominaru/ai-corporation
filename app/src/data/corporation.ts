@@ -19,7 +19,7 @@ export interface Agent {
   y: number
 }
 
-export type TaskTypeId = 'research' | 'dev' | 'content'
+export type TaskTypeId = 'rnd' | 'product' | 'marketing'
 
 export interface TaskType {
   id: TaskTypeId
@@ -34,22 +34,37 @@ export const ENTRY_POINT = { x: 480, y: 6 }
 
 export const DEPARTMENTS: Department[] = [
   { id: 'dir', name: 'Дирекция', nameEn: 'Directorate', color: '43 90% 55%' },
-  { id: 'analytics', name: 'Аналитика', nameEn: 'Analytics', color: '199 89% 60%' },
-  { id: 'dev', name: 'Разработка', nameEn: 'Engineering', color: '160 84% 45%' },
-  { id: 'content', name: 'Контент', nameEn: 'Content', color: '262 83% 66%' },
+  { id: 'rnd', name: 'R&D · Новые продукты', nameEn: 'R&D · New products', color: '199 89% 60%' },
+  { id: 'dev', name: 'Продукт', nameEn: 'Product', color: '160 84% 45%' },
+  { id: 'marketing', name: 'Маркетинг', nameEn: 'Marketing', color: '262 83% 66%' },
   { id: 'qa', name: 'Контроль качества', nameEn: 'Quality Control', color: '346 77% 60%' },
   { id: 'delivery', name: 'Доставка', nameEn: 'Delivery', color: '187 80% 50%' },
 ]
 
+/** Продуктовые линии компании, которые дорабатывает отдел «Продукт» */
+export const PRODUCTS = [
+  { id: 'yardniki', name: 'ЯРДНИКИ', nameEn: 'YARDNIKI' },
+  { id: 'manifest', name: 'ПРОЯВЛЕННОСТЬ', nameEn: 'VISIBILITY' },
+  { id: 'brand', name: 'BRAND FACTORY', nameEn: 'BRAND FACTORY' },
+  { id: 'repost', name: 'РЕПОСТ', nameEn: 'REPOST' },
+] as const
+
+export const CEO = {
+  name: 'Анастасия Соломина',
+  nameEn: 'Anastasia Solomina',
+  role: 'CEO · основатель',
+  roleEn: 'CEO · founder',
+}
+
 export const AGENTS: Agent[] = [
-  { id: 'ceo', name: 'КОРД', role: 'Директор-координатор', roleEn: 'Director & coordinator', model: 'Kimi K2', departmentId: 'dir', stageName: 'декомпозиция задачи', stageNameEn: 'task decomposition', x: 480, y: 92 },
-  { id: 'scout', name: 'СКАУТ', role: 'Веб-разведчик', roleEn: 'Web scout', model: 'Perplexity Sonar Pro', departmentId: 'analytics', stageName: 'веб-разведка', stageNameEn: 'web reconnaissance', x: 148, y: 140 },
-  { id: 'researcher', name: 'ИСКАТЕЛЬ', role: 'Исследователь', roleEn: 'Researcher', model: 'GPT-5', departmentId: 'analytics', stageName: 'сбор информации', stageNameEn: 'information gathering', x: 300, y: 218 },
-  { id: 'analyst', name: 'ВЕСТА', role: 'Аналитик', roleEn: 'Analyst', model: 'Claude Sonnet 4.5', departmentId: 'analytics', stageName: 'анализ данных', stageNameEn: 'data analysis', x: 172, y: 330 },
+  { id: 'ceo', name: 'КОРД', role: 'ИИ-советник директора', roleEn: 'AI advisor to the CEO', model: 'Kimi K2', departmentId: 'dir', stageName: 'декомпозиция задачи', stageNameEn: 'task decomposition', x: 480, y: 92 },
+  { id: 'scout', name: 'СКАУТ', role: 'Разведка трендов и рынков', roleEn: 'Trend & market scout', model: 'Perplexity Sonar Pro', departmentId: 'rnd', stageName: 'веб-разведка', stageNameEn: 'web reconnaissance', x: 148, y: 140 },
+  { id: 'researcher', name: 'ИСКАТЕЛЬ', role: 'Продуктовый исследователь', roleEn: 'Product researcher', model: 'GPT-5', departmentId: 'rnd', stageName: 'сбор информации', stageNameEn: 'information gathering', x: 300, y: 218 },
+  { id: 'analyst', name: 'ВЕСТА', role: 'Аналитик монетизации', roleEn: 'Monetization analyst', model: 'Claude Sonnet 4.5', departmentId: 'rnd', stageName: 'анализ данных', stageNameEn: 'data analysis', x: 172, y: 330 },
   { id: 'arch', name: 'АРХИТЕКТОР', role: 'Системный архитектор', roleEn: 'System architect', model: 'GPT-5.1 Codex', departmentId: 'dev', stageName: 'проектирование решения', stageNameEn: 'solution design', x: 660, y: 218 },
   { id: 'eng', name: 'ИНЖЕНЕР', role: 'Ведущий разработчик', roleEn: 'Lead engineer', model: 'Qwen3-Coder', departmentId: 'dev', stageName: 'реализация', stageNameEn: 'implementation', x: 788, y: 330 },
-  { id: 'copy', name: 'АВТОР', role: 'Копирайтер', roleEn: 'Copywriter', model: 'Gemini 3 Pro', departmentId: 'content', stageName: 'создание текста', stageNameEn: 'copywriting', x: 330, y: 430 },
-  { id: 'edit', name: 'РЕДАКТОР', role: 'Шеф-редактор', roleEn: 'Editor-in-chief', model: 'Claude Haiku 4.5', departmentId: 'content', stageName: 'редактура и вычитка', stageNameEn: 'editing & proofreading', x: 470, y: 386 },
+  { id: 'copy', name: 'АВТОР', role: 'Копирайтер', roleEn: 'Copywriter', model: 'Gemini 3 Pro', departmentId: 'marketing', stageName: 'создание текста', stageNameEn: 'copywriting', x: 330, y: 430 },
+  { id: 'edit', name: 'РЕДАКТОР', role: 'Шеф-редактор', roleEn: 'Editor-in-chief', model: 'Claude Haiku 4.5', departmentId: 'marketing', stageName: 'редактура и вычитка', stageNameEn: 'editing & proofreading', x: 470, y: 386 },
   { id: 'qa', name: 'РЕЦЕНЗЕНТ', role: 'Контролёр качества', roleEn: 'Quality controller', model: 'DeepSeek R2', departmentId: 'qa', stageName: 'проверка качества', stageNameEn: 'quality check', x: 600, y: 470 },
   { id: 'rel', name: 'РЕЛИЗ', role: 'Релиз-менеджер', roleEn: 'Release manager', model: 'Llama 4 Maverick', departmentId: 'delivery', stageName: 'публикация результата', stageNameEn: 'publishing result', x: 480, y: 566 },
 ]
@@ -59,51 +74,51 @@ export const DEPT_BY_ID: Record<string, Department> = Object.fromEntries(DEPARTM
 
 export const TASK_TYPES: TaskType[] = [
   {
-    id: 'research',
-    label: 'Исследование',
-    labelEn: 'Research',
+    id: 'rnd',
+    label: 'R&D · новый продукт',
+    labelEn: 'R&D · new product',
     route: ['ceo', 'scout', 'researcher', 'analyst', 'qa', 'rel'],
     presets: [
-      'Обзор рынка ИИ-агентов за Q3',
-      'Сравнение конкурентов по ценам',
-      'Анализ отзывов клиентов за месяц',
+      'Новая обучающая платформа — оценка монетизации',
+      'Сервис по подписке: спрос и модель дохода',
+      'Обучающий продукт: упаковка и запуск',
     ],
     presetsEn: [
-      'AI agents market overview for Q3',
-      'Competitor pricing comparison',
-      'Customer feedback analysis for the month',
+      'New learning platform — monetization estimate',
+      'Subscription service: demand and revenue model',
+      'Educational product: packaging and launch',
     ],
   },
   {
-    id: 'dev',
-    label: 'Разработка',
-    labelEn: 'Development',
+    id: 'product',
+    label: 'Доработка продукта',
+    labelEn: 'Product upgrade',
     route: ['ceo', 'arch', 'eng', 'qa', 'rel'],
     presets: [
-      'Микросервис уведомлений в Telegram',
-      'Оптимизация времени ответа API',
-      'Дашборд метрик для отдела продаж',
+      'Новая фича для удержания клиентов',
+      'Улучшение воронки оплаты',
+      'Рефакторинг ключевого модуля',
     ],
     presetsEn: [
-      'Telegram notification microservice',
-      'API response time optimization',
-      'Metrics dashboard for the sales team',
+      'New customer retention feature',
+      'Payment funnel improvement',
+      'Key module refactoring',
     ],
   },
   {
-    id: 'content',
-    label: 'Контент',
-    labelEn: 'Content',
+    id: 'marketing',
+    label: 'Маркетинг',
+    labelEn: 'Marketing',
     route: ['ceo', 'copy', 'edit', 'qa', 'rel'],
     presets: [
-      'Статья о запуске нового продукта',
+      'Запуск рекламной кампании продукта',
       'Серия постов для соцсетей',
-      'Пресс-релиз к годовщине компании',
+      'Продающая лендинг-страница',
     ],
     presetsEn: [
-      'Article about the new product launch',
+      'Product ad campaign launch',
       'Social media post series',
-      'Press release for the company anniversary',
+      'Sales landing page',
     ],
   },
 ]
@@ -161,10 +176,10 @@ export function edgePathD(p0: Vec, p1: Vec): string {
 
 /** Системные промпты агентов для режима реальных моделей */
 export const SYSTEM_PROMPTS: Record<string, string> = {
-  ceo: 'Ты — директор-координатор ИИ-корпорации. Декомпозируй поступившую задачу: сформулируй цель, критерии результата и план из 3–4 шагов для команды.',
-  scout: 'Ты — веб-разведчик ИИ-корпорации. Найди в интернете свежие факты по задаче: 3–5 пунктов с указанием, что подтверждено источниками.',
-  researcher: 'Ты — исследователь ИИ-корпорации. Собери и структурируй ключевую информацию по задаче, отметь пробелы в данных.',
-  analyst: 'Ты — аналитик ИИ-корпорации. Проанализируй собранные данные: выводы, закономерности, риски.',
+  ceo: 'Ты — ИИ-советник директора компании (основатель и CEO — Анастасия Соломина). Декомпозируй поступившую задачу: сформулируй цель, ожидаемый вклад в монетизацию и план из 3–4 шагов для команды.',
+  scout: 'Ты — разведчик трендов R&D-отдела. Найди в интернете свежее по задаче: 3–5 пунктов о рынке, конкурентах и моделях монетизации (платформы, сервисы, обучающие продукты).',
+  researcher: 'Ты — продуктовый исследователь R&D-отдела. Собери и структурируй информацию по задаче: целевая аудитория, форматы продуктов, что уже покупают.',
+  analyst: 'Ты — аналитик монетизации R&D-отдела. Оцени собранные данные: потенциал дохода, модели монетизации, риски и что запустить первым.',
   arch: 'Ты — системный архитектор ИИ-корпорации. Спроектируй техническое решение: компоненты, интерфейсы, ограничения.',
   eng: 'Ты — ведущий разработчик ИИ-корпорации. Опиши реализацию: ключевая логика, фрагменты кода, что готово к проверке.',
   copy: 'Ты — копирайтер ИИ-корпорации. Напиши черновик текста по задаче: заголовок и основная часть.',

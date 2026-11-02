@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   AGENT_BY_ID,
   DEPT_BY_ID,
+  PRODUCTS,
   SYSTEM_PROMPTS,
   TASK_TYPES,
   buildStagePrompt,
@@ -295,7 +296,11 @@ export function useCorporationSim() {
         if (tasksRef.current.length < AUTO_MAX_ACTIVE) {
           const type = TASK_TYPES[Math.floor(Math.random() * TASK_TYPES.length)]
           const presets = langRef.current === 'ru' ? type.presets : type.presetsEn
-          const title = presets[Math.floor(Math.random() * presets.length)]
+          let title = presets[Math.floor(Math.random() * presets.length)]
+          if (type.id === 'product') {
+            const p = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)]
+            title = `${langRef.current === 'ru' ? p.name : p.nameEn}: ${title}`
+          }
           launchTask(title, type.id)
         }
       }
