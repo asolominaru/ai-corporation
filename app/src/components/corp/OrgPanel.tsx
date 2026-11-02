@@ -1,18 +1,21 @@
 import { AGENTS, DEPARTMENTS } from '@/data/corporation'
+import { STRINGS, type Lang } from '@/i18n'
 import { cn } from '@/lib/utils'
 
 interface Props {
   busyByAgent: Record<string, { taskId: number; progress: number | null }>
   selected: string | null
   onSelect: (id: string | null) => void
+  lang: Lang
 }
 
-export default function OrgPanel({ busyByAgent, selected, onSelect }: Props) {
+export default function OrgPanel({ busyByAgent, selected, onSelect, lang }: Props) {
+  const s = STRINGS[lang]
   return (
     <aside className="flex h-60 w-full shrink-0 flex-col border-b border-border bg-card/40 lg:h-auto lg:w-72 lg:border-b-0 lg:border-r">
       <div className="border-b border-border px-4 py-3">
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Оргструктура · {AGENTS.length} агентов
+          {s.orgChart(AGENTS.length)}
         </h2>
       </div>
       <div className="scroll-slim flex-1 overflow-y-auto p-2">
@@ -27,7 +30,7 @@ export default function OrgPanel({ busyByAgent, selected, onSelect }: Props) {
                   aria-hidden="true"
                 />
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  {dept.name}
+                  {lang === 'ru' ? dept.name : dept.nameEn}
                 </span>
               </div>
               {agents.map((agent) => {
@@ -54,7 +57,7 @@ export default function OrgPanel({ busyByAgent, selected, onSelect }: Props) {
                     <span className="min-w-0 flex-1 leading-tight">
                       <span className="block truncate text-sm font-semibold">{agent.name}</span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {agent.role}
+                        {lang === 'ru' ? agent.role : agent.roleEn}
                       </span>
                     </span>
                     {busy ? (
@@ -65,7 +68,7 @@ export default function OrgPanel({ busyByAgent, selected, onSelect }: Props) {
                         {busy.progress === null ? '…' : `${Math.round(busy.progress * 100)}%`}
                       </span>
                     ) : (
-                      <span className="font-mono text-[11px] text-muted-foreground">свободен</span>
+                      <span className="font-mono text-[11px] text-muted-foreground">{s.idle}</span>
                     )}
                   </button>
                 )

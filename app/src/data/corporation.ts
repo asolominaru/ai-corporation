@@ -1,6 +1,7 @@
 export interface Department {
   id: string
   name: string
+  nameEn: string
   /** hsl triple, e.g. "43 90% 55%" */
   color: string
 }
@@ -9,9 +10,11 @@ export interface Agent {
   id: string
   name: string
   role: string
+  roleEn: string
   model: string
   departmentId: string
   stageName: string
+  stageNameEn: string
   x: number
   y: number
 }
@@ -21,32 +24,34 @@ export type TaskTypeId = 'research' | 'dev' | 'content'
 export interface TaskType {
   id: TaskTypeId
   label: string
+  labelEn: string
   route: string[]
   presets: string[]
+  presetsEn: string[]
 }
 
 export const ENTRY_POINT = { x: 480, y: 6 }
 
 export const DEPARTMENTS: Department[] = [
-  { id: 'dir', name: 'Дирекция', color: '43 90% 55%' },
-  { id: 'analytics', name: 'Аналитика', color: '199 89% 60%' },
-  { id: 'dev', name: 'Разработка', color: '160 84% 45%' },
-  { id: 'content', name: 'Контент', color: '262 83% 66%' },
-  { id: 'qa', name: 'Контроль качества', color: '346 77% 60%' },
-  { id: 'delivery', name: 'Доставка', color: '187 80% 50%' },
+  { id: 'dir', name: 'Дирекция', nameEn: 'Directorate', color: '43 90% 55%' },
+  { id: 'analytics', name: 'Аналитика', nameEn: 'Analytics', color: '199 89% 60%' },
+  { id: 'dev', name: 'Разработка', nameEn: 'Engineering', color: '160 84% 45%' },
+  { id: 'content', name: 'Контент', nameEn: 'Content', color: '262 83% 66%' },
+  { id: 'qa', name: 'Контроль качества', nameEn: 'Quality Control', color: '346 77% 60%' },
+  { id: 'delivery', name: 'Доставка', nameEn: 'Delivery', color: '187 80% 50%' },
 ]
 
 export const AGENTS: Agent[] = [
-  { id: 'ceo', name: 'КОРД', role: 'Директор-координатор', model: 'Kimi K2', departmentId: 'dir', stageName: 'декомпозиция задачи', x: 480, y: 92 },
-  { id: 'scout', name: 'СКАУТ', role: 'Веб-разведчик', model: 'Perplexity Sonar Pro', departmentId: 'analytics', stageName: 'веб-разведка', x: 148, y: 140 },
-  { id: 'researcher', name: 'ИСКАТЕЛЬ', role: 'Исследователь', model: 'GPT-5', departmentId: 'analytics', stageName: 'сбор информации', x: 300, y: 218 },
-  { id: 'analyst', name: 'ВЕСТА', role: 'Аналитик', model: 'Claude Sonnet 4.5', departmentId: 'analytics', stageName: 'анализ данных', x: 172, y: 330 },
-  { id: 'arch', name: 'АРХИТЕКТОР', role: 'Системный архитектор', model: 'GPT-5.1 Codex', departmentId: 'dev', stageName: 'проектирование решения', x: 660, y: 218 },
-  { id: 'eng', name: 'ИНЖЕНЕР', role: 'Ведущий разработчик', model: 'Qwen3-Coder', departmentId: 'dev', stageName: 'реализация', x: 788, y: 330 },
-  { id: 'copy', name: 'АВТОР', role: 'Копирайтер', model: 'Gemini 3 Pro', departmentId: 'content', stageName: 'создание текста', x: 330, y: 430 },
-  { id: 'edit', name: 'РЕДАКТОР', role: 'Шеф-редактор', model: 'Claude Haiku 4.5', departmentId: 'content', stageName: 'редактура и вычитка', x: 470, y: 386 },
-  { id: 'qa', name: 'РЕЦЕНЗЕНТ', role: 'Контролёр качества', model: 'DeepSeek R2', departmentId: 'qa', stageName: 'проверка качества', x: 600, y: 470 },
-  { id: 'rel', name: 'РЕЛИЗ', role: 'Релиз-менеджер', model: 'Llama 4 Maverick', departmentId: 'delivery', stageName: 'публикация результата', x: 480, y: 566 },
+  { id: 'ceo', name: 'КОРД', role: 'Директор-координатор', roleEn: 'Director & coordinator', model: 'Kimi K2', departmentId: 'dir', stageName: 'декомпозиция задачи', stageNameEn: 'task decomposition', x: 480, y: 92 },
+  { id: 'scout', name: 'СКАУТ', role: 'Веб-разведчик', roleEn: 'Web scout', model: 'Perplexity Sonar Pro', departmentId: 'analytics', stageName: 'веб-разведка', stageNameEn: 'web reconnaissance', x: 148, y: 140 },
+  { id: 'researcher', name: 'ИСКАТЕЛЬ', role: 'Исследователь', roleEn: 'Researcher', model: 'GPT-5', departmentId: 'analytics', stageName: 'сбор информации', stageNameEn: 'information gathering', x: 300, y: 218 },
+  { id: 'analyst', name: 'ВЕСТА', role: 'Аналитик', roleEn: 'Analyst', model: 'Claude Sonnet 4.5', departmentId: 'analytics', stageName: 'анализ данных', stageNameEn: 'data analysis', x: 172, y: 330 },
+  { id: 'arch', name: 'АРХИТЕКТОР', role: 'Системный архитектор', roleEn: 'System architect', model: 'GPT-5.1 Codex', departmentId: 'dev', stageName: 'проектирование решения', stageNameEn: 'solution design', x: 660, y: 218 },
+  { id: 'eng', name: 'ИНЖЕНЕР', role: 'Ведущий разработчик', roleEn: 'Lead engineer', model: 'Qwen3-Coder', departmentId: 'dev', stageName: 'реализация', stageNameEn: 'implementation', x: 788, y: 330 },
+  { id: 'copy', name: 'АВТОР', role: 'Копирайтер', roleEn: 'Copywriter', model: 'Gemini 3 Pro', departmentId: 'content', stageName: 'создание текста', stageNameEn: 'copywriting', x: 330, y: 430 },
+  { id: 'edit', name: 'РЕДАКТОР', role: 'Шеф-редактор', roleEn: 'Editor-in-chief', model: 'Claude Haiku 4.5', departmentId: 'content', stageName: 'редактура и вычитка', stageNameEn: 'editing & proofreading', x: 470, y: 386 },
+  { id: 'qa', name: 'РЕЦЕНЗЕНТ', role: 'Контролёр качества', roleEn: 'Quality controller', model: 'DeepSeek R2', departmentId: 'qa', stageName: 'проверка качества', stageNameEn: 'quality check', x: 600, y: 470 },
+  { id: 'rel', name: 'РЕЛИЗ', role: 'Релиз-менеджер', roleEn: 'Release manager', model: 'Llama 4 Maverick', departmentId: 'delivery', stageName: 'публикация результата', stageNameEn: 'publishing result', x: 480, y: 566 },
 ]
 
 export const AGENT_BY_ID: Record<string, Agent> = Object.fromEntries(AGENTS.map((a) => [a.id, a]))
@@ -56,31 +61,49 @@ export const TASK_TYPES: TaskType[] = [
   {
     id: 'research',
     label: 'Исследование',
+    labelEn: 'Research',
     route: ['ceo', 'scout', 'researcher', 'analyst', 'qa', 'rel'],
     presets: [
       'Обзор рынка ИИ-агентов за Q3',
       'Сравнение конкурентов по ценам',
       'Анализ отзывов клиентов за месяц',
     ],
+    presetsEn: [
+      'AI agents market overview for Q3',
+      'Competitor pricing comparison',
+      'Customer feedback analysis for the month',
+    ],
   },
   {
     id: 'dev',
     label: 'Разработка',
+    labelEn: 'Development',
     route: ['ceo', 'arch', 'eng', 'qa', 'rel'],
     presets: [
       'Микросервис уведомлений в Telegram',
       'Оптимизация времени ответа API',
       'Дашборд метрик для отдела продаж',
     ],
+    presetsEn: [
+      'Telegram notification microservice',
+      'API response time optimization',
+      'Metrics dashboard for the sales team',
+    ],
   },
   {
     id: 'content',
     label: 'Контент',
+    labelEn: 'Content',
     route: ['ceo', 'copy', 'edit', 'qa', 'rel'],
     presets: [
       'Статья о запуске нового продукта',
       'Серия постов для соцсетей',
       'Пресс-релиз к годовщине компании',
+    ],
+    presetsEn: [
+      'Article about the new product launch',
+      'Social media post series',
+      'Press release for the company anniversary',
     ],
   },
 ]

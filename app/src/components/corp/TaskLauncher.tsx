@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Bot, Pause, Play, SendHorizonal, Sparkles } from 'lucide-react'
 import { TASK_TYPES, type TaskTypeId } from '@/data/corporation'
 import type { Mode } from '@/hooks/useCorporationSim'
+import { STRINGS, type Lang } from '@/i18n'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -12,17 +13,20 @@ interface Props {
   mode: Mode
   onModeChange: (m: Mode) => void
   proxyOk: boolean | null
+  lang: Lang
 }
 
-export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onModeChange, proxyOk }: Props) {
+export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onModeChange, proxyOk, lang }: Props) {
+  const s = STRINGS[lang]
   const [type, setType] = useState<TaskTypeId>('research')
   const [title, setTitle] = useState('')
 
   const current = TASK_TYPES.find((t) => t.id === type)!
+  const presets = lang === 'ru' ? current.presets : current.presetsEn
   const realBlocked = mode === 'real' && proxyOk === false
 
   const submit = () => {
-    const value = title.trim() || current.presets[Math.floor(Math.random() * current.presets.length)]
+    const value = title.trim() || presets[Math.floor(Math.random() * presets.length)]
     onLaunch(value, type)
     setTitle('')
   }
@@ -42,7 +46,7 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
             )}
           >
             <Sparkles size={13} />
-            Симуляция
+            {s.simulation}
           </button>
           <button
             type="button"
@@ -55,7 +59,7 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
             )}
           >
             <Bot size={13} />
-            Реальные модели
+            {s.liveModels}
           </button>
         </div>
 
@@ -74,7 +78,7 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              {t.label}
+              {lang === 'ru' ? t.label : t.labelEn}
             </button>
           ))}
         </div>
@@ -85,14 +89,14 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
           onKeyDown={(e) => {
             if (e.key === 'Enter') submit()
           }}
-          placeholder={`Например: ${current.presets[0]}`}
-          aria-label="Текст задачи"
+          placeholder={`${s.examplePrefix}: ${presets[0]}`}
+          aria-label={s.taskWord}
           className="min-w-40 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-1 focus:ring-ring"
         />
 
         <Button type="button" onClick={submit} disabled={realBlocked} className="gap-2 font-semibold">
           <SendHorizonal size={15} />
-          Запустить задачу
+          {s.launchTask}
         </Button>
 
         {mode === 'sim' ? (
@@ -104,7 +108,7 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
             className={cn('gap-2', auto && 'border-primary/60 text-primary')}
           >
             {auto ? <Pause size={15} /> : <Play size={15} />}
-            Авто-режим {auto ? 'вкл' : 'выкл'}
+            {auto ? s.autoOn : s.autoOff}
           </Button>
         ) : (
           <span
@@ -118,16 +122,12 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
               className={cn('h-2 w-2 rounded-full', proxyOk ? 'bg-emerald-400' : 'bg-destructive')}
               aria-hidden="true"
             />
-            {proxyOk === null ? 'проверка шлюза…' : proxyOk ? 'шлюз :4000 онлайн' : 'шлюз недоступен'}
+            {proxyOk === null ? s.gatewayChecking : proxyOk ? s.gatewayOnline : s.gatewayOffline}
           </span>
         )}
       </div>
       <p className="mt-1.5 text-[11px] text-muted-foreground">
-        {mode === 'sim'
-          ? 'Симуляция: корпорация показывает поток задач без реальных вызовов. Авто-режим берёт задачи из очереди каждые несколько секунд.'
-          : realBlocked
-            ? 'Шлюз не отвечает. Запустите его командой: litellm-server/start.sh — и вставьте ключи в litellm-server/.env'
-            : 'Реальный режим: каждый этап выполняет настоящая модель через LiteLLM-шлюз. Ответы агентов появляются в журнале. Каждый запуск тратит токены.'}
+        {mode === 'sim' ? s.hintSim : realBlocked ? s.hintRealBlocked : s.hintReal}
       </p>
     </div>
   )

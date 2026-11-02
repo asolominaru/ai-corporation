@@ -8,6 +8,7 @@ import {
   type TaskTypeId,
 } from '@/data/corporation'
 import { callAgent, checkGateway } from '@/lib/gateway'
+import { STRINGS, type Lang } from '@/i18n'
 
 export type Mode = 'sim' | 'real'
 
@@ -64,13 +65,14 @@ export function useCorporationSim() {
       at: Date.now(),
       agentId: null,
       kind: 'system',
-      text: 'Центр управления запущен. Все агенты на связи.',
+      text: STRINGS.ru.logStarted,
     },
   ])
   const [metrics, setMetrics] = useState<Metrics>({ launched: 0, done: 0, avgMs: 0 })
   const [auto, setAuto] = useState(true)
   const [mode, setModeState] = useState<Mode>('sim')
   const [proxyOk, setProxyOk] = useState<boolean | null>(null)
+  const [lang, setLangState] = useState<Lang>('ru')
 
   const idRef = useRef(1)
   const taskIdRef = useRef(1)
@@ -80,6 +82,12 @@ export function useCorporationSim() {
   const realCallsRef = useRef<Map<number, RealCall>>(new Map())
   const lastOutputRef = useRef<Map<number, string>>(new Map())
   const modeRef = useRef<Mode>('sim')
+  const langRef = useRef<Lang>('ru')
+
+  const setLang = useCallback((l: Lang) => {
+    setLangState(l)
+    langRef.current = l
+  }, [])
 
   const pushLog = useCallback((entry: Omit<LogEntry, 'id' | 'at'>) => {
     setLog((prev) => [{ ...entry, id: idRef.current++, at: Date.now() }, ...prev].slice(0, MAX_LOG))
@@ -94,10 +102,10 @@ export function useCorporationSim() {
         pushLog({
           agentId: null,
           kind: 'system',
-          text: 'Режим реальных моделей: этапы выполняют настоящие LLM через шлюз :4000. Авто-режим выключен во избежание лишних расходов.',
+          text: STRINGS[langRef.current].logModeReal,
         })
       } else {
-        pushLog({ agentId: null, kind: 'system', text: 'Включён режим симуляции.' })
+        pushLog({ agentId: null, kind: 'system', text: STRINGS[langRef.current].logModeSim })
       }
     },
     [pushLog],
@@ -143,7 +151,11 @@ export function useCorporationSim() {
       pushLog({
         agentId: null,
         kind: 'in',
-        text: `Новая задача #${id}: «${title}» — маршрут: ${t.label.toLowerCase()}`,
+        text: STRINGS[langRef.current].logNewTask(
+          id,
+          title,
+          (langRef.current === 'ru' ? t.label : t.labelEn).toLowerCase(),
+        ),
       })
     },
     [pushLog],
@@ -169,10 +181,12 @@ export function useCorporationSim() {
           }
           // прибыл к агенту
           changed = true
+          const S = STRINGS[langRef.current]
+          const stageLabel = langRef.current === 'ru' ? agent.stageName : agent.stageNameEn
           pushLog({
             agentId,
             kind: 'step',
-            text: `${agent.name} принял задачу #${task.id} — этап «${agent.stageName}»`,
+            text: S.logAccepted(agent.name, task.id, stageLabel),
           })
           const workTask: ActiveTask = { ...task, phase: 'work', t0: nowMs, duration: workDuration() }
           if (modeRef.current === 'real') {
@@ -203,11 +217,17 @@ export function useCorporationSim() {
             const excerpt = call.text.length > 220 ? call.text.slice(0, 220) + '…' : call.text
             pushLog({ agentId, kind: 'step', text: `${agent.name}: ${excerpt}` })
           } else {
-            lastOutputRef.current.set(task.id, `Этап «${agent.stageName}» завершился ошибкой: ${call.text}`)
+            const stageLabel = langRef.current === 'ru' ? agent.stageName : agent.stageNameEn
+            lastOutputRef.current.set(
+              task.id,
+              langRef.current === 'ru'
+                ? `Этап «${stageLabel}» завершился ошибкой: ${call.text}`
+                : `Stage "${stageLabel}" failed: ${call.text}`,
+            )
             pushLog({
               agentId,
               kind: 'error',
-              text: `${agent.name} не смог выполнить этап (задача #${task.id}): ${call.text.slice(0, 180)}`,
+              text: STRINGS[langRef.current].logError(agent.name, task.id, call.text.slice(0, 180)),
             })
           }
           finishHop(task, agentId, nowMs, next)
@@ -226,6 +246,7 @@ export function useCorporationSim() {
 
       function finishHop(task: ActiveTask, agentId: string, nowMs: number, acc: ActiveTask[]) {
         const agent = AGENT_BY_ID[agentId]
+        const S = STRINGS[langRef.current]
         if (task.hopIndex === task.route.length - 1) {
           const total = nowMs - task.createdAt
           durationsRef.current.push(total)
@@ -236,19 +257,20 @@ export function useCorporationSim() {
           pushLog({
             agentId,
             kind: 'done',
-            text: `Задача #${task.id} выполнена за ${(total / 1000).toFixed(1)} с — ${agent.name} опубликовал результат`,
+            text: S.logDone(task.id, (total / 1000).toFixed(1), agent.name),
           })
           // задача завершена — не переносим в next
         } else {
           const nextAgent = AGENT_BY_ID[task.route[task.hopIndex + 1]]
+          const stageLabel = langRef.current === 'ru' ? agent.stageName : agent.stageNameEn
           if (modeRef.current === 'sim') {
             pushLog({
               agentId,
               kind: 'step',
-              text: `${agent.name} завершил «${agent.stageName}», передаёт → ${nextAgent.name}`,
+              text: S.logStageDone(agent.name, stageLabel, nextAgent.name),
             })
           } else {
-            pushLog({ agentId, kind: 'step', text: `${agent.name} передаёт задачу #${task.id} → ${nextAgent.name}` })
+            pushLog({ agentId, kind: 'step', text: S.logTransfer(agent.name, task.id, nextAgent.name) })
           }
           acc.push({
             ...task,
@@ -272,7 +294,8 @@ export function useCorporationSim() {
         lastAutoRef.current = nowMs
         if (tasksRef.current.length < AUTO_MAX_ACTIVE) {
           const type = TASK_TYPES[Math.floor(Math.random() * TASK_TYPES.length)]
-          const title = type.presets[Math.floor(Math.random() * type.presets.length)]
+          const presets = langRef.current === 'ru' ? type.presets : type.presetsEn
+          const title = presets[Math.floor(Math.random() * presets.length)]
           launchTask(title, type.id)
         }
       }
@@ -301,10 +324,12 @@ export function useCorporationSim() {
     mode,
     setMode,
     proxyOk,
+    lang,
+    setLang,
     launchTask,
     busyByAgent,
     clearLog: useCallback(() => {
-      setLog([{ id: idRef.current++, at: Date.now(), agentId: null, kind: 'system', text: 'Журнал очищен.' }])
+      setLog([{ id: idRef.current++, at: Date.now(), agentId: null, kind: 'system', text: STRINGS[langRef.current].logCleared }])
     }, []),
     deptColor: (agentId: string) => DEPT_BY_ID[AGENT_BY_ID[agentId].departmentId].color,
   }

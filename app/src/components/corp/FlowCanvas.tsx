@@ -10,6 +10,7 @@ import {
   nodePos,
 } from '@/data/corporation'
 import type { ActiveTask } from '@/hooks/useCorporationSim'
+import { STRINGS, type Lang } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 
@@ -19,12 +20,14 @@ interface Props {
   busyByAgent: Record<string, { taskId: number; progress: number | null }>
   selected: string | null
   onSelect: (id: string | null) => void
+  lang: Lang
 }
 
 const NODE_W = 128
 const NODE_H = 46
 
-export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect }: Props) {
+export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect, lang }: Props) {
+  const s = STRINGS[lang]
   const selectedAgent = selected ? AGENT_BY_ID[selected] : null
   const selectedBusy = selected ? busyByAgent[selected] : undefined
   const selectedTask = selectedBusy ? tasks.find((t) => t.id === selectedBusy.taskId) : undefined
@@ -35,7 +38,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
         viewBox="0 0 960 620"
         className="h-full w-full"
         role="img"
-        aria-label="Схема потока задач между агентами ИИ-корпорации"
+        aria-label={s.canvasAria}
       >
         <defs>
           <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
@@ -66,7 +69,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
             fontSize="11"
             fontFamily="JetBrains Mono, monospace"
           >
-            ВХОД
+            {s.inbox}
           </text>
         </g>
 
@@ -126,7 +129,11 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
                   onSelect(isSelected ? null : agent.id)
                 }
               }}
-              aria-label={`Агент ${agent.name}, ${agent.role}`}
+              aria-label={
+                lang === 'ru'
+                  ? `Агент ${agent.name}, ${agent.role}`
+                  : `Agent ${agent.name}, ${agent.roleEn}`
+              }
             >
               {busy && (
                 <>
@@ -210,7 +217,9 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
                 className="fill-muted-foreground"
                 fontFamily="JetBrains Mono, monospace"
               >
-                {busy ? `${agent.stageName}…` : agent.model}
+                {busy
+                  ? `${lang === 'ru' ? agent.stageName : agent.stageNameEn}…`
+                  : agent.model}
               </text>
             </g>
           )
@@ -224,47 +233,56 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
             'absolute right-4 top-4 w-72 rounded-lg border border-border bg-popover p-4 shadow-xl',
           )}
           role="dialog"
-          aria-label={`Карточка агента ${selectedAgent.name}`}
+          aria-label={
+            lang === 'ru'
+              ? `Карточка агента ${selectedAgent.name}`
+              : `Agent card ${selectedAgent.name}`
+          }
         >
           <div className="mb-2 flex items-start justify-between">
             <div>
               <div className="text-base font-bold">{selectedAgent.name}</div>
-              <div className="text-xs text-muted-foreground">{selectedAgent.role}</div>
+              <div className="text-xs text-muted-foreground">
+                {lang === 'ru' ? selectedAgent.role : selectedAgent.roleEn}
+              </div>
             </div>
             <button
               type="button"
               onClick={() => onSelect(null)}
               className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="Закрыть карточку агента"
+              aria-label={s.closeAgent}
             >
               <X size={16} />
             </button>
           </div>
           <dl className="space-y-1.5 text-sm">
             <div className="flex justify-between gap-2">
-              <dt className="text-muted-foreground">Отдел</dt>
+              <dt className="text-muted-foreground">{s.department}</dt>
               <dd
                 className="font-semibold"
                 style={{ color: `hsl(${DEPT_BY_ID[selectedAgent.departmentId].color})` }}
               >
-                {DEPT_BY_ID[selectedAgent.departmentId].name}
+                {lang === 'ru'
+                  ? DEPT_BY_ID[selectedAgent.departmentId].name
+                  : DEPT_BY_ID[selectedAgent.departmentId].nameEn}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-muted-foreground">Модель</dt>
+              <dt className="text-muted-foreground">{s.modelLabel}</dt>
               <dd className="font-mono text-xs">{selectedAgent.model}</dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-muted-foreground">Статус</dt>
+              <dt className="text-muted-foreground">{s.status}</dt>
               <dd className="font-semibold">
-                {selectedBusy ? `Занят · задача #${selectedBusy.taskId}` : 'Свободен'}
+                {selectedBusy ? s.busyTask(selectedBusy.taskId) : s.free}
               </dd>
             </div>
             {selectedTask && (
               <div className="mt-2 rounded-md bg-secondary p-2 text-xs text-secondary-foreground">
-                «{selectedTask.title}» — этап «{selectedAgent.stageName}»,{' '}
+                «{selectedTask.title}» —{' '}
+                {s.currentStage(lang === 'ru' ? selectedAgent.stageName : selectedAgent.stageNameEn)},{' '}
                 {selectedBusy!.progress === null
-                  ? 'модель думает…'
+                  ? s.modelThinking
                   : `${Math.round(selectedBusy!.progress! * 100)}%`}
               </div>
             )}

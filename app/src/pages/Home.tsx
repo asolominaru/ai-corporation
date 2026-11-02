@@ -17,9 +17,11 @@ export default function Home() {
         activeCount={sim.tasks.length}
         busyCount={Object.keys(sim.busyByAgent).length}
         now={sim.now}
+        lang={sim.lang}
+        onLangChange={sim.setLang}
       />
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <OrgPanel busyByAgent={sim.busyByAgent} selected={selected} onSelect={setSelected} />
+        <OrgPanel busyByAgent={sim.busyByAgent} selected={selected} onSelect={setSelected} lang={sim.lang} />
         <main className="flex min-w-0 flex-1 flex-col">
           <FlowCanvas
             now={sim.now}
@@ -27,6 +29,7 @@ export default function Home() {
             busyByAgent={sim.busyByAgent}
             selected={selected}
             onSelect={setSelected}
+            lang={sim.lang}
           />
           <TaskLauncher
             auto={sim.auto}
@@ -35,9 +38,10 @@ export default function Home() {
             mode={sim.mode}
             onModeChange={sim.setMode}
             proxyOk={sim.proxyOk}
+            lang={sim.lang}
           />
         </main>
-        <EventLog log={sim.log} onClear={sim.clearLog} />
+        <EventLog log={sim.log} onClear={sim.clearLog} lang={sim.lang} />
       </div>
     </div>
   )
