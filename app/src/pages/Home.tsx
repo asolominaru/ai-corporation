@@ -4,7 +4,7 @@ import OrgPanel from '@/components/corp/OrgPanel'
 import FlowCanvas from '@/components/corp/FlowCanvas'
 import EventLog from '@/components/corp/EventLog'
 import TaskLauncher from '@/components/corp/TaskLauncher'
-import ApprovalPanel from '@/components/corp/ApprovalPanel'
+import KanbanBoard from '@/components/corp/KanbanBoard'
 import { useCorporationSim } from '@/hooks/useCorporationSim'
 
 export default function Home() {
@@ -32,7 +32,13 @@ export default function Home() {
             onSelect={setSelected}
             lang={sim.lang}
           />
-          <ApprovalPanel tasks={sim.tasks} lang={sim.lang} onApprove={sim.approveTask} onReject={sim.rejectTask} />
+          <KanbanBoard
+            tasks={sim.tasks}
+            doneTasks={sim.doneTasks}
+            lang={sim.lang}
+            onApprove={sim.approveTask}
+            onReject={sim.rejectTask}
+          />
           <TaskLauncher
             auto={sim.auto}
             onToggleAuto={sim.setAuto}

@@ -50,6 +50,10 @@ interface Strings {
   approve: string
   rework: string
   taskWord: string
+  kanbanInProgress: string
+  kanbanApproval: string
+  kanbanDone: string
+  kanbanEmpty: string
 }
 
 export const STRINGS: Record<Lang, Strings> = {
@@ -106,6 +110,10 @@ export const STRINGS: Record<Lang, Strings> = {
     approve: 'Принять',
     rework: 'На доработку',
     taskWord: 'Текст задачи',
+    kanbanInProgress: 'В работе',
+    kanbanApproval: 'На приёмке · CEO',
+    kanbanDone: 'Выполнено',
+    kanbanEmpty: 'пусто',
   },
   en: {
     subtitle: 'agent control center',
@@ -160,5 +168,9 @@ export const STRINGS: Record<Lang, Strings> = {
     approve: 'Accept',
     rework: 'Send back',
     taskWord: 'Task text',
+    kanbanInProgress: 'In progress',
+    kanbanApproval: 'CEO acceptance',
+    kanbanDone: 'Done',
+    kanbanEmpty: 'empty',
   },
 }

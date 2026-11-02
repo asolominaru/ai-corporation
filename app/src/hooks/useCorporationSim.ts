@@ -43,6 +43,14 @@ export interface Metrics {
   avgMs: number
 }
 
+export interface DoneTask {
+  id: number
+  title: string
+  type: TaskTypeId
+  totalMs: number
+  completedAt: number
+}
+
 interface RealCall {
   status: 'ok' | 'error'
   text: string
@@ -70,6 +78,7 @@ export function useCorporationSim() {
     },
   ])
   const [metrics, setMetrics] = useState<Metrics>({ launched: 0, done: 0, avgMs: 0 })
+  const [doneTasks, setDoneTasks] = useState<DoneTask[]>([])
   const [auto, setAuto] = useState(true)
   const [mode, setModeState] = useState<Mode>('sim')
   const [proxyOk, setProxyOk] = useState<boolean | null>(null)
@@ -326,6 +335,9 @@ export function useCorporationSim() {
       if (durationsRef.current.length > 30) durationsRef.current.shift()
       const avg = Math.round(durationsRef.current.reduce((a, b) => a + b, 0) / durationsRef.current.length)
       setMetrics((m) => ({ ...m, done: m.done + 1, avgMs: avg }))
+      setDoneTasks((prev) =>
+        [{ id: task.id, title: task.title, type: task.type, totalMs: total, completedAt: nowMs }, ...prev].slice(0, 20),
+      )
       lastOutputRef.current.delete(taskId)
       tasksRef.current = tasksRef.current.filter((t) => t.id !== taskId)
       setTasks(tasksRef.current)
@@ -373,6 +385,7 @@ export function useCorporationSim() {
     approveTask,
     rejectTask,
     busyByAgent,
+    doneTasks,
     clearLog: useCallback(() => {
       setLog([{ id: idRef.current++, at: Date.now(), agentId: null, kind: 'system', text: STRINGS[langRef.current].logCleared }])
     }, []),
