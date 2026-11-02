@@ -1,0 +1,60 @@
+general_settings:
+  master_key: sk-corp-local
+  allowed_origins: ["*"]
+
+litellm_settings:
+  request_timeout: 120
+  num_retries: 1
+
+# Каждый агент корпорации = алиас модели.
+# Провайдер модели можно менять, не трогая приложение.
+model_list:
+  - model_name: agent-ceo
+    litellm_params:
+      model: moonshot/kimi-k2-0905-preview
+      api_key: os.environ/MOONSHOT_API_KEY
+
+  - model_name: agent-scout
+    litellm_params:
+      model: perplexity/sonar-pro
+      api_key: os.environ/PERPLEXITY_API_KEY
+
+  - model_name: agent-researcher
+    litellm_params:
+      model: openai/gpt-5
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: agent-analyst
+    litellm_params:
+      model: anthropic/claude-sonnet-4-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: agent-arch
+    litellm_params:
+      model: openai/gpt-5
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: agent-eng
+    litellm_params:
+      model: openai/gpt-5-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: agent-copy
+    litellm_params:
+      model: gemini/gemini-2.5-pro
+      api_key: os.environ/GEMINI_API_KEY
+
+  - model_name: agent-edit
+    litellm_params:
+      model: anthropic/claude-haiku-4-5
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: agent-qa
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: os.environ/DEEPSEEK_API_KEY
+
+  - model_name: agent-rel
+    litellm_params:
+      model: openrouter/meta-llama/llama-4-maverick
+      api_key: os.environ/OPENROUTER_API_KEY

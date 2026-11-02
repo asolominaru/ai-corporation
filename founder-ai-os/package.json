@@ -1,0 +1,14 @@
+{
+  "name": "founder-ai-os",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AI Corporate OS — ядро v0: tenant-конфиг, реестр ролей, Task Protocol v1, журнал с приёмкой по sha256 и human approval.",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "board": "node src/board.mjs"
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "version": "1.0",
+  "note": "Реестр ролей Blueprint v1. Наследует контракты из corporation_repo (31 роль A/E/S/P/F); здесь — действующие роли ядра v0. Статус: локальный пилот, платные автономные вызовы заблокированы (budget null).",
+  "roles": [
+    {
+      "id": "AICEO",
+      "name": "AI CEO / Дирижёр",
+      "department": "management",
+      "mission": "Декомпозирует цель владельца в задачи по протоколу, распределяет исполнителей, поднимает наверх только решения, требующие владельца (3–7 в день).",
+      "contract": {
+        "inputs": ["цель владельца", "состояние журнала", "ограничения и бюджет"],
+        "outputs": ["задачи по протоколу", "список решений для владельца"],
+        "allowed_tools": ["board", "knowledge_search"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null, "note": "null = платные вызовы заблокированы"},
+        "independent_reviewer": "AUD"
+      }
+    },
+    {
+      "id": "RES",
+      "name": "Исследователь",
+      "department": "product",
+      "mission": "Проверяет проблему, сегмент, альтернативы; отделяет факты от мнений.",
+      "contract": {
+        "inputs": ["задача", "разрешённые источники"],
+        "outputs": ["исследование с источниками", "непроверенные предположения отдельно"],
+        "allowed_tools": ["text_model", "knowledge_search"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "AUD"
+      }
+    },
+    {
+      "id": "PRD",
+      "name": "Продакт",
+      "department": "product",
+      "mission": "Формирует оффер, спецификацию и полный пользовательский путь.",
+      "contract": {
+        "inputs": ["исследование", "цель"],
+        "outputs": ["спецификация", "критерии приёмки"],
+        "allowed_tools": ["text_model"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "AUD"
+      }
+    },
+    {
+      "id": "CDS",
+      "name": "Chief Decision Scientist",
+      "department": "decision_science",
+      "mission": "Формализует переменные, считает вероятности, строит симуляции. Имеет право вернуть решение с формулировкой «данных недостаточно».",
+      "contract": {
+        "inputs": ["решение или гипотеза", "доступные данные"],
+        "outputs": ["модель/расчёт", "чувствительность", "условия, при которых решение неверно"],
+        "allowed_tools": ["text_model", "compute"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "AUD"
+      }
+    },
+    {
+      "id": "CNT",
+      "name": "Content Director",
+      "department": "content_and_growth",
+      "mission": "Редакционная стратегия: что производить, для кого, с каким CTA и как измерять результат.",
+      "contract": {
+        "inputs": ["сырьё из базы знаний", "цели направлений"],
+        "outputs": ["редакционный план", "карточки материалов с полями BRAND/AUDIENCE/PURPOSE/FUNNEL_STAGE/CTA/RESULT"],
+        "allowed_tools": ["text_model", "knowledge_search"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "CAU"
+      }
+    },
+    {
+      "id": "CAU",
+      "name": "Content Auditor",
+      "department": "content_and_growth",
+      "mission": "Отвечает на вопрос «кому это вообще надо читать»; ловит банальность и слабые формулировки.",
+      "contract": {
+        "inputs": ["материал", "карточка материала"],
+        "outputs": ["вердикт с правками или отклонением"],
+        "allowed_tools": ["text_model"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "AUD"
+      }
+    },
+    {
+      "id": "SAL",
+      "name": "Продажи",
+      "department": "sales",
+      "mission": "Ведёт воронку: квалификация → контакт → встреча → предложение → оплата. Массовые обращения — только после human approval.",
+      "contract": {
+        "inputs": ["лиды", "оффер"],
+        "outputs": ["следующие действия", "статусы сделок"],
+        "allowed_tools": ["text_model", "crm"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "AUD"
+      }
+    },
+    {
+      "id": "DEVCX",
+      "name": "Codex Worker",
+      "department": "development",
+      "mission": "Разработчик 1: реализация, тесты, миграции. Работает в отдельном worktree; не деплоит напрямую.",
+      "contract": {
+        "inputs": ["задача по протоколу", "AGENTS.md", "репозиторий"],
+        "outputs": ["branch + код + тесты", "отчёт WHAT_CHANGED/FILES_CHANGED/TEST_RESULTS/RISKS"],
+        "allowed_tools": ["repo", "shell_sandbox", "tests"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "DEVCL"
+      }
+    },
+    {
+      "id": "DEVCL",
+      "name": "Claude Worker",
+      "department": "development",
+      "mission": "Разработчик 2 и независимый reviewer: проверяет diff, безопасность, UX, тесты; вердикт APPROVE/REWORK.",
+      "contract": {
+        "inputs": ["diff", "критерии задачи"],
+        "outputs": ["ревью с вердиктом"],
+        "allowed_tools": ["repo_read", "tests"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "DEVCX"
+      }
+    },
+    {
+      "id": "AUD",
+      "name": "Независимый аудитор",
+      "department": "control",
+      "mission": "Не участвует в создании результата. Проверяет артефакт по контрольной сумме и критериям; ищет причины провала. Запрещено хвалить без доказательств.",
+      "contract": {
+        "inputs": ["артефакт + sha256", "критерии приёмки"],
+        "outputs": ["accepted / changes_requested с обоснованием"],
+        "allowed_tools": ["artifact_read"],
+        "data_classes": ["public", "internal"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": "OWNER"
+      }
+    },
+    {
+      "id": "OWNER",
+      "name": "Владелец (Анастасия)",
+      "department": "ownership",
+      "mission": "Цель, приоритеты, бюджет, приёмка ценности, human approval рискованных действий.",
+      "contract": {
+        "inputs": ["решения, требующие владельца"],
+        "outputs": ["решение", "изменение приоритетов"],
+        "allowed_tools": ["board"],
+        "data_classes": ["all"],
+        "budget": {"per_run_rub": null},
+        "independent_reviewer": null
+      }
+    }
+  ]
+}

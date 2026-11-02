@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "status": "конфигурация; автоматическая маршрутизация не подключена",
+  "principle": "Измеряем качество на наших задачах (арена), а не верим маркетингу производителей. Code review — не той моделью, что писала код.",
+  "data_policy": {
+    "confidential": "только утверждённый контур (сейчас: модели текущих сеансов владельца)",
+    "personal_data": "только утверждённый контур",
+    "anonymized": "допустимы дешёвые и open-weight модели",
+    "public": "любые утверждённые модели"
+  },
+  "task_classes": {
+    "strategy_architecture": {"tier": "flagship_reasoning", "review_required": true},
+    "coding_backend": {"tier": "coding_worker", "workers": ["DEVCX", "DEVCL"], "mode": "PARALLEL"},
+    "coding_frontend": {"tier": "coding_worker", "workers": ["DEVCX", "DEVCL"], "mode": "PARALLEL"},
+    "code_review": {"rule": "не автор кода", "mode": "REVIEW"},
+    "independent_audit": {"tier": "long_context", "rule": "модель не участвовала в создании"},
+    "writing_ux": {"tier": "mid"},
+    "classification_qualification": {"tier": "cheap", "data": "anonymized_or_public"},
+    "rnd_research": {"tier": "ensemble", "rule": "минимум два независимых прохода"}
+  },
+  "arena": {
+    "enabled": false,
+    "note": "Внутренняя арена качества моделей — этап 5 дорожной карты. До её включения таблица tier → конкретная модель назначается владельцем вручную."
+  }
+}
