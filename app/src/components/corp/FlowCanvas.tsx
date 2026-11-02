@@ -9,7 +9,7 @@ import {
   edgePathD,
   nodePos,
 } from '@/data/corporation'
-import type { ActiveTask } from '@/hooks/useCorporationSim'
+import type { ActiveTask, AgentOverrides } from '@/hooks/useCorporationSim'
 import { STRINGS, type Lang } from '@/i18n'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
@@ -21,16 +21,18 @@ interface Props {
   selected: string | null
   onSelect: (id: string | null) => void
   lang: Lang
+  overrides: AgentOverrides
 }
 
 const NODE_W = 128
 const NODE_H = 46
 
-export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect, lang }: Props) {
+export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect, lang, overrides }: Props) {
   const s = STRINGS[lang]
   const selectedAgent = selected ? AGENT_BY_ID[selected] : null
   const selectedBusy = selected ? busyByAgent[selected] : undefined
   const selectedTask = selectedBusy ? tasks.find((t) => t.id === selectedBusy.taskId) : undefined
+  const effModel = (id: string, fallback: string) => overrides[id]?.model ?? fallback
 
   return (
     <div className="relative min-h-[340px] min-w-0 flex-1 bg-[radial-gradient(ellipse_at_top,hsl(222_30%_10%)_0%,hsl(222_32%_6%)_60%)]">
@@ -236,7 +238,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
               >
                 {busy
                   ? `${lang === 'ru' ? agent.stageName : agent.stageNameEn}…`
-                  : agent.model}
+                  : effModel(agent.id, agent.model)}
               </text>
             </g>
           )
@@ -286,7 +288,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-muted-foreground">{s.modelLabel}</dt>
-              <dd className="font-mono text-xs">{selectedAgent.model}</dd>
+              <dd className="font-mono text-xs">{effModel(selectedAgent.id, selectedAgent.model)}</dd>
             </div>
             <div className="flex justify-between gap-2">
               <dt className="text-muted-foreground">{s.status}</dt>

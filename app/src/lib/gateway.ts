@@ -21,6 +21,7 @@ export async function callAgent(
   agentId: string,
   system: string,
   user: string,
+  modelOverride?: string,
 ): Promise<AgentCallResult> {
   try {
     const res = await fetch(`${GATEWAY_BASE}/v1/chat/completions`, {
@@ -30,7 +31,7 @@ export async function callAgent(
         Authorization: `Bearer ${GATEWAY_KEY}`,
       },
       body: JSON.stringify({
-        model: `agent-${agentId}`,
+        model: modelOverride ?? `agent-${agentId}`,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },

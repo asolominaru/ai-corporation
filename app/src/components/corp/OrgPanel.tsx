@@ -1,3 +1,4 @@
+import { Settings2 } from 'lucide-react'
 import { AGENTS, DEPARTMENTS, CEO } from '@/data/corporation'
 import { STRINGS, type Lang } from '@/i18n'
 import { cn } from '@/lib/utils'
@@ -6,10 +7,11 @@ interface Props {
   busyByAgent: Record<string, { taskId: number; progress: number | null }>
   selected: string | null
   onSelect: (id: string | null) => void
+  onConfigure: (deptId: string) => void
   lang: Lang
 }
 
-export default function OrgPanel({ busyByAgent, selected, onSelect, lang }: Props) {
+export default function OrgPanel({ busyByAgent, selected, onSelect, onConfigure, lang }: Props) {
   const s = STRINGS[lang]
   return (
     <aside className="flex h-60 w-full shrink-0 flex-col border-b border-border bg-card/40 lg:h-auto lg:w-72 lg:border-b-0 lg:border-r">
@@ -29,9 +31,18 @@ export default function OrgPanel({ busyByAgent, selected, onSelect, lang }: Prop
                   style={{ background: `hsl(${dept.color})` }}
                   aria-hidden="true"
                 />
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <span className="flex-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {lang === 'ru' ? dept.name : dept.nameEn}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => onConfigure(dept.id)}
+                  className="rounded-md p-1 text-muted-foreground/60 transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  aria-label={`${s.configureDept}: ${lang === 'ru' ? dept.name : dept.nameEn}`}
+                  title={s.configureDept}
+                >
+                  <Settings2 size={13} />
+                </button>
               </div>
               {dept.id === 'dir' && (
                 <div className="mb-1 flex w-full items-center gap-2.5 rounded-md border border-primary/30 bg-primary/5 px-2.5 py-2 text-left">

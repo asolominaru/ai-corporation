@@ -72,6 +72,29 @@ export const AGENTS: Agent[] = [
 export const AGENT_BY_ID: Record<string, Agent> = Object.fromEntries(AGENTS.map((a) => [a.id, a]))
 export const DEPT_BY_ID: Record<string, Department> = Object.fromEntries(DEPARTMENTS.map((d) => [d.id, d]))
 
+/** Каталог моделей для настройки агентов. label — как показываем в UI, litellm — идентификатор для шлюза */
+export interface ModelOption {
+  label: string
+  litellm: string
+}
+export const MODEL_CATALOG: ModelOption[] = [
+  { label: 'Kimi K2', litellm: 'moonshot/kimi-k2-0905-preview' },
+  { label: 'Perplexity Sonar Pro', litellm: 'perplexity/sonar-pro' },
+  { label: 'GPT-5', litellm: 'openai/gpt-5' },
+  { label: 'GPT-5 mini', litellm: 'openai/gpt-5-mini' },
+  { label: 'GPT-5.1 Codex', litellm: 'openai/gpt-5.1-codex' },
+  { label: 'Claude Sonnet 4.5', litellm: 'anthropic/claude-sonnet-4-5' },
+  { label: 'Claude Haiku 4.5', litellm: 'anthropic/claude-haiku-4-5' },
+  { label: 'Gemini 3 Pro', litellm: 'gemini/gemini-3-pro' },
+  { label: 'DeepSeek R2', litellm: 'deepseek/deepseek-reasoner' },
+  { label: 'Qwen3-Coder', litellm: 'openrouter/qwen/qwen3-coder' },
+  { label: 'Llama 4 Maverick', litellm: 'openrouter/meta-llama/llama-4-maverick' },
+]
+
+export function litellmIdForLabel(label: string): string | undefined {
+  return MODEL_CATALOG.find((o) => o.label === label)?.litellm
+}
+
 export const TASK_TYPES: TaskType[] = [
   {
     id: 'rnd',

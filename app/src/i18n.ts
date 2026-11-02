@@ -54,6 +54,20 @@ interface Strings {
   kanbanApproval: string
   kanbanDone: string
   kanbanEmpty: string
+  viewFlow: string
+  viewDash: string
+  dashDeptLoad: string
+  dashByType: string
+  dashCycles: string
+  dashPending: string
+  dashReworks: string
+  dashNoData: string
+  deptSettings: string
+  configureDept: string
+  promptLabel: string
+  modelNote: string
+  close: string
+  resetDefault: string
 }
 
 export const STRINGS: Record<Lang, Strings> = {
@@ -114,6 +128,20 @@ export const STRINGS: Record<Lang, Strings> = {
     kanbanApproval: 'На приёмке · CEO',
     kanbanDone: 'Выполнено',
     kanbanEmpty: 'пусто',
+    viewFlow: 'Схема',
+    viewDash: 'Дашборд',
+    dashDeptLoad: 'Загрузка отделов',
+    dashByType: 'Задачи по типам',
+    dashCycles: 'Длительность циклов',
+    dashPending: 'на приёмке',
+    dashReworks: 'на доработку',
+    dashNoData: 'пока нет данных',
+    deptSettings: 'Настройка отдела',
+    configureDept: 'Настроить отдел',
+    promptLabel: 'Системный промпт',
+    modelNote: 'Модель применяется в режиме реальных моделей — провайдер должен быть прописан в litellm-server/config.yaml',
+    close: 'Закрыть',
+    resetDefault: 'Сбросить',
   },
   en: {
     subtitle: 'agent control center',
@@ -172,5 +200,19 @@ export const STRINGS: Record<Lang, Strings> = {
     kanbanApproval: 'CEO acceptance',
     kanbanDone: 'Done',
     kanbanEmpty: 'empty',
+    viewFlow: 'Flow',
+    viewDash: 'Dashboard',
+    dashDeptLoad: 'Department load',
+    dashByType: 'Tasks by type',
+    dashCycles: 'Cycle durations',
+    dashPending: 'awaiting CEO',
+    dashReworks: 'sent back',
+    dashNoData: 'no data yet',
+    deptSettings: 'Department settings',
+    configureDept: 'Configure department',
+    promptLabel: 'System prompt',
+    modelNote: 'The model applies in live mode — the provider must be listed in litellm-server/config.yaml',
+    close: 'Close',
+    resetDefault: 'Reset',
   },
 }

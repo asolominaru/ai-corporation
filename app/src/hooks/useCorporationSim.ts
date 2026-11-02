@@ -6,6 +6,7 @@ import {
   SYSTEM_PROMPTS,
   TASK_TYPES,
   buildStagePrompt,
+  litellmIdForLabel,
   type TaskTypeId,
 } from '@/data/corporation'
 import { callAgent, checkGateway } from '@/lib/gateway'
@@ -51,6 +52,25 @@ export interface DoneTask {
   completedAt: number
 }
 
+/** Переопределения настроек агента из панели отдела (модель / системный промпт) */
+export interface AgentOverride {
+  model?: string
+  prompt?: string
+}
+
+export type AgentOverrides = Record<string, AgentOverride>
+
+const OVERRIDES_KEY = 'corp-overrides-v1'
+
+function loadOverrides(): AgentOverrides {
+  try {
+    const raw = localStorage.getItem(OVERRIDES_KEY)
+    return raw ? (JSON.parse(raw) as AgentOverrides) : {}
+  } catch {
+    return {}
+  }
+}
+
 interface RealCall {
   status: 'ok' | 'error'
   text: string
@@ -79,6 +99,13 @@ export function useCorporationSim() {
   ])
   const [metrics, setMetrics] = useState<Metrics>({ launched: 0, done: 0, avgMs: 0 })
   const [doneTasks, setDoneTasks] = useState<DoneTask[]>([])
+  const [byTypeLaunched, setByTypeLaunched] = useState<Record<TaskTypeId, number>>({
+    rnd: 0,
+    product: 0,
+    marketing: 0,
+  })
+  const [reworks, setReworks] = useState(0)
+  const [overrides, setOverrides] = useState<AgentOverrides>(loadOverrides)
   const [auto, setAuto] = useState(true)
   const [mode, setModeState] = useState<Mode>('sim')
   const [proxyOk, setProxyOk] = useState<boolean | null>(null)
@@ -93,10 +120,33 @@ export function useCorporationSim() {
   const lastOutputRef = useRef<Map<number, string>>(new Map())
   const modeRef = useRef<Mode>('sim')
   const langRef = useRef<Lang>('ru')
+  const overridesRef = useRef<AgentOverrides>(overrides)
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l)
     langRef.current = l
+  }, [])
+
+  const setAgentOverride = useCallback((agentId: string, patch: AgentOverride) => {
+    setOverrides((prev) => {
+      const cur = prev[agentId] ?? {}
+      const nextPatch: AgentOverride = { ...cur }
+      for (const k of Object.keys(patch) as Array<keyof AgentOverride>) {
+        const v = patch[k]
+        if (v === undefined || v === '') delete nextPatch[k]
+        else nextPatch[k] = v
+      }
+      const next = { ...prev }
+      if (nextPatch.model === undefined && nextPatch.prompt === undefined) delete next[agentId]
+      else next[agentId] = nextPatch
+      overridesRef.current = next
+      try {
+        localStorage.setItem(OVERRIDES_KEY, JSON.stringify(next))
+      } catch {
+        /* приватный режим — просто не сохраняем */
+      }
+      return next
+    })
   }, [])
 
   const pushLog = useCallback((entry: Omit<LogEntry, 'id' | 'at'>) => {
@@ -158,6 +208,7 @@ export function useCorporationSim() {
       tasksRef.current = [...tasksRef.current, task]
       setTasks(tasksRef.current)
       setMetrics((m) => ({ ...m, launched: m.launched + 1 }))
+      setByTypeLaunched((prev) => ({ ...prev, [type]: prev[type] + 1 }))
       pushLog({
         agentId: null,
         kind: 'in',
@@ -207,7 +258,10 @@ export function useCorporationSim() {
           if (modeRef.current === 'real') {
             workTask.callStarted = true
             const prevOutput = lastOutputRef.current.get(task.id) ?? null
-            callAgent(agentId, SYSTEM_PROMPTS[agentId], buildStagePrompt(agentId, task.title, prevOutput)).then(
+            const ov = overridesRef.current[agentId]
+            const system = ov?.prompt ?? SYSTEM_PROMPTS[agentId]
+            const modelOverride = ov?.model ? litellmIdForLabel(ov.model) : undefined
+            callAgent(agentId, system, buildStagePrompt(agentId, task.title, prevOutput), modelOverride).then(
               (res) => {
                 realCallsRef.current.set(task.id, { status: res.ok ? 'ok' : 'error', text: res.text })
               },
@@ -364,6 +418,7 @@ export function useCorporationSim() {
           : t,
       )
       setTasks(tasksRef.current)
+      setReworks((n) => n + 1)
       pushLog({ agentId: null, kind: 'step', text: STRINGS[langRef.current].logRework(taskId, AGENT_BY_ID[task.route[backTo]].name) })
     },
     [pushLog],
@@ -386,6 +441,10 @@ export function useCorporationSim() {
     rejectTask,
     busyByAgent,
     doneTasks,
+    byTypeLaunched,
+    reworks,
+    overrides,
+    setAgentOverride,
     clearLog: useCallback(() => {
       setLog([{ id: idRef.current++, at: Date.now(), agentId: null, kind: 'system', text: STRINGS[langRef.current].logCleared }])
     }, []),
