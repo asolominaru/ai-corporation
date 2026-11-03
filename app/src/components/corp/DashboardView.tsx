@@ -47,7 +47,7 @@ export default function DashboardView({ tasks, doneTasks, metrics, byTypeLaunche
   ]
 
   return (
-    <div className="scroll-slim min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top,hsl(222_30%_10%)_0%,hsl(222_32%_6%)_60%)] p-4">
+    <div className="scroll-slim min-h-0 flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_top,hsl(42_45%_98%)_0%,hsl(40_28%_92%)_60%)] p-4">
       {/* KPI */}
       <div className="mb-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
         {kpis.map((k) => (

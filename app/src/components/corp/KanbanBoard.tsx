@@ -94,7 +94,7 @@ export default function KanbanBoard({ tasks, doneTasks, lang, onApprove, onRejec
               <button
                 type="button"
                 onClick={() => onApprove(t.id)}
-                className="flex items-center gap-1 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 transition-colors hover:bg-emerald-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex items-center gap-1 rounded-md bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 transition-colors hover:bg-emerald-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <Check size={11} />
                 {s.approve}
@@ -119,7 +119,7 @@ export default function KanbanBoard({ tasks, doneTasks, lang, onApprove, onRejec
         {doneTasks.map((t) => (
           <div key={`${t.id}-${t.completedAt}`} className="rounded-md border border-border bg-card px-2.5 py-1.5">
             <div className="flex items-center gap-1.5 truncate text-xs">
-              <Check size={12} className="shrink-0 text-emerald-400" />
+              <Check size={12} className="shrink-0 text-emerald-600" />
               <span className="truncate">
                 <span className="font-mono text-[10px] text-muted-foreground">#{t.id}</span> {t.title}
               </span>

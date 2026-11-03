@@ -35,7 +35,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
   const effModel = (id: string, fallback: string) => overrides[id]?.model ?? fallback
 
   return (
-    <div className="relative min-h-[340px] min-w-0 flex-1 bg-[radial-gradient(ellipse_at_top,hsl(222_30%_10%)_0%,hsl(222_32%_6%)_60%)]">
+    <div className="relative min-h-[340px] min-w-0 flex-1 bg-[radial-gradient(ellipse_at_top,hsl(42_45%_98%)_0%,hsl(40_28%_92%)_60%)]">
       <svg
         viewBox="0 0 960 620"
         className="h-full w-full"
@@ -60,8 +60,8 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
             width="68"
             height="22"
             rx="11"
-            fill="hsl(220 18% 14%)"
-            stroke="hsl(43 90% 55% / 0.5)"
+            fill="hsl(0 0% 100%)"
+            stroke="hsl(38 92% 42% / 0.5)"
           />
           <text
             x={ENTRY_POINT.x}
@@ -87,7 +87,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
               key={`${e.from}->${e.to}`}
               d={edgePathD(p0, p1)}
               fill="none"
-              stroke={active ? 'hsl(43 90% 55% / 0.55)' : 'hsl(220 16% 20%)'}
+              stroke={active ? 'hsl(38 92% 42% / 0.6)' : 'hsl(220 12% 76%)'}
               strokeWidth={active ? 2 : 1.2}
               strokeDasharray={active ? '6 5' : undefined}
             />
@@ -103,8 +103,8 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
             const pos = bezierAt(p0, edgeControl(p0, p1), p1, Math.min(1, (now - t.t0) / t.duration))
             return (
               <g key={t.id} className="packet" filter="url(#glow)">
-                <circle cx={pos.x} cy={pos.y} r="7" fill="hsl(43 90% 55% / 0.35)" />
-                <circle cx={pos.x} cy={pos.y} r="3.5" fill="hsl(43 90% 55%)" />
+                <circle cx={pos.x} cy={pos.y} r="7" fill="hsl(38 92% 42% / 0.3)" />
+                <circle cx={pos.x} cy={pos.y} r="3.5" fill="hsl(38 92% 42%)" />
               </g>
             )
           })}
@@ -112,7 +112,7 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
         {/* бейдж ожидающих приёмки задач у дирекции */}
         {tasks.some((t) => t.phase === 'approval') && (
           <g className="packet" filter="url(#glow)">
-            <circle cx={558} cy={66} r="13" fill="hsl(43 90% 55%)" />
+            <circle cx={558} cy={66} r="13" fill="hsl(38 92% 42%)" />
             <text
               x={558}
               y={71}
@@ -207,13 +207,13 @@ export default function FlowCanvas({ now, tasks, busyByAgent, selected, onSelect
                 width={NODE_W}
                 height={NODE_H}
                 rx="10"
-                fill={busy ? `hsl(${dept.color} / 0.14)` : 'hsl(222 26% 10%)'}
+                fill={busy ? `hsl(${dept.color} / 0.14)` : 'hsl(0 0% 100%)'}
                 stroke={
                   isSelected
-                    ? 'hsl(43 90% 55%)'
+                    ? 'hsl(38 92% 42%)'
                     : busy
                       ? `hsl(${dept.color})`
-                      : `hsl(${dept.color} / 0.35)`
+                      : `hsl(${dept.color} / 0.45)`
                 }
                 strokeWidth={isSelected ? 2.5 : 1.5}
               />

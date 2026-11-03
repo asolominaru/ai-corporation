@@ -75,7 +75,7 @@ export default function OrgPanel({ busyByAgent, selected, onSelect, onConfigure,
                     <span
                       className={cn('h-2.5 w-2.5 shrink-0 rounded-full', busy && 'agent-pulse')}
                       style={{
-                        background: busy ? `hsl(${dept.color})` : 'hsl(217 14% 40%)',
+                        background: busy ? `hsl(${dept.color})` : 'hsl(217 10% 68%)',
                       }}
                       aria-hidden="true"
                     />

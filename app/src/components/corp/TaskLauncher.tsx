@@ -145,12 +145,12 @@ export default function TaskLauncher({ auto, onToggleAuto, onLaunch, mode, onMod
           <span
             className={cn(
               'flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs',
-              proxyOk ? 'border-emerald-500/40 text-emerald-400' : 'border-destructive/50 text-destructive',
+              proxyOk ? 'border-emerald-500/40 text-emerald-600' : 'border-destructive/50 text-destructive',
             )}
             role="status"
           >
             <span
-              className={cn('h-2 w-2 rounded-full', proxyOk ? 'bg-emerald-400' : 'bg-destructive')}
+              className={cn('h-2 w-2 rounded-full', proxyOk ? 'bg-emerald-500' : 'bg-destructive')}
               aria-hidden="true"
             />
             {proxyOk === null ? s.gatewayChecking : proxyOk ? s.gatewayOnline : s.gatewayOffline}
