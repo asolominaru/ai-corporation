@@ -1,0 +1,51 @@
+{
+  "date": "2026-11-05",
+  "timezone": "Europe/Moscow",
+  "node": "v26.5.0",
+  "unit_tests": {
+    "passed": 15,
+    "failed": 0
+  },
+  "frontend_build": "PASS",
+  "frontend_lint": {
+    "status": "FAIL",
+    "errors": 10
+  },
+  "workflow_schema": {
+    "passed": 4,
+    "failed": 0
+  },
+  "agent_schema": {
+    "passed": 13,
+    "failed": 3,
+    "missing_prompt_files": 16
+  },
+  "company_schema": "PASS",
+  "bootstrap_bash_syntax": {
+    "passed": 3
+  },
+  "compose": "STATIC_FAIL_DUPLICATE_VOLUMES_AND_MISSING_FILES",
+  "docker_runtime": "NOT_TESTED_CLI_UNAVAILABLE",
+  "offline_reproductions": {
+    "owner_chat_replaced": true,
+    "non_owner_decision_logged": true,
+    "conflicting_decisions_logged": true,
+    "unknown_request_decision_logged": true,
+    "all_five_model_calls_failed_but_task_reached_approval": true,
+    "done_after_approving_failed_task": 1,
+    "board_accepted_changed_artifact_after_review": true
+  },
+  "source_sha256": {
+    "approval-bot/approvals.py": "8df54115d1dcaae926aac737216b4cc29654c9ed9f30c07ebcee818d65438b77",
+    "app/src/hooks/useCorporationSim.ts": "1d87d43105a3617afce5a779b024ea06ec6387b02957719fb790258a52b72c98",
+    "app/src/lib/gateway.ts": "4c8f4639b5822784c42c603fa73163b49f5e651bd4afdfe220669a96f6658341",
+    "founder-ai-os/src/board.mjs": "a5cee3c2b84d8ed2ef3b50c8b75f7642e4ff3b94ae16f227b2461e2c3d261099",
+    "founder-ai-os/infra/docker-compose.yml": "06db0f056a9082525d98308b89831cb7bae8cf48747a1f30d1b08a213d689c3c",
+    "founder-ai-os/docs/DISASTER_RECOVERY.md": "41af21110de77aade45919c5d705cfa5a3e6eae2b384dc5e62b0bd36398addab",
+    "founder-ai-os/infra/bootstrap/install-spain.sh": "4d08edce21a991cb6512440201c68698d9ae8dd9519395b4685a9fe810f494aa",
+    "founder-ai-os/infra/bootstrap/install-russia.sh": "5f7bedfd689e998d82eaeee94bdb070d99d97639c57f7ea7a0ca772b8f9d213e",
+    "founder-ai-os/infra/bootstrap/install-kazakhstan.sh": "db069c8d30b088bf7ff18e2764fa2087fc4fe97ffd32688a1e6cf11660cd49e4",
+    "founder-ai-os/config/company.json": "985cdead00b034a8aefc837a32ce82d2372e867f2cc6f4f494f0ec59ea0e671d",
+    "founder-ai-os/blueprints/company.yaml": "bcbead424ae7d22e5a5b05891a5d860057b5bf1abe1be38d7893f8ee751f1222"
+  }
+}

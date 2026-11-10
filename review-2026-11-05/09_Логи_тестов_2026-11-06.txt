@@ -1,0 +1,58 @@
+=== orchestrator-suite.txt ===
+..........................                                               [100%]
+=============================== warnings summary ===============================
+../../../../../Users/solominaag/КОРПОРАЦИЯ/KIMI  КОРПОРАЦИЯ/КОРПОРАЦИЯ/founder-ai-os/services/orchestrator/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/solominaag/КОРПОРАЦИЯ/KIMI  КОРПОРАЦИЯ/КОРПОРАЦИЯ/founder-ai-os/services/orchestrator/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+26 passed, 1 warning in 4.96s
+
+
+=== orchestrator-reproductions.txt ===
+...                                                                      [100%]
+=============================== warnings summary ===============================
+../../../../../Users/solominaag/КОРПОРАЦИЯ/KIMI  КОРПОРАЦИЯ/КОРПОРАЦИЯ/founder-ai-os/services/orchestrator/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/solominaag/КОРПОРАЦИЯ/KIMI  КОРПОРАЦИЯ/КОРПОРАЦИЯ/founder-ai-os/services/orchestrator/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 1 warning in 2.14s
+
+
+=== router-reproductions.txt ===
+.....                                                                    [100%]
+=============================== warnings summary ===============================
+../../../../../Users/solominaag/КОРПОРАЦИЯ/KIMI  КОРПОРАЦИЯ/КОРПОРАЦИЯ/founder-ai-os/services/orchestrator/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/solominaag/КОРПОРАЦИЯ/KIMI  КОРПОРАЦИЯ/КОРПОРАЦИЯ/founder-ai-os/services/orchestrator/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+5 passed, 1 warning in 1.28s
+
+
+=== board-suite.txt ===
+✔ add: валидная задача создаётся, reviewer берётся из контракта роли (34.342375ms)
+✔ add: дубликат id отклоняется (2.407875ms)
+✔ add: неизвестное направление отклоняется (0.302666ms)
+✔ add: обязательные поля протокола (0.391791ms)
+✔ add: reviewer не из контракта и совпадение с исполнителем отклоняются (0.3035ms)
+✔ add: режим и бюджет валидируются (1.122333ms)
+✔ add: владелец не может быть исполнителем (0.427875ms)
+✔ полный цикл: start → submit → review accepted (8.856584ms)
+✔ submit: артефакт вне outputs отклоняется (2.784083ms)
+✔ review: устаревший хэш отклоняется (защита от решения по другой версии) (3.771458ms)
+✔ review: подмена артефакта после сдачи обнаруживается (7.331666ms)
+✔ human_approval: accepted аудитором → pending_owner → approve владельца (10.451375ms)
+✔ K-11: подмена артефакта между review и approve обнаруживается (5.260875ms)
+✔ human_approval: reject владельца возвращает в changes_requested (8.554709ms)
+✔ audit: ревью своей работы невозможно; события пишутся (2.22425ms)
+✔ list: фильтр по направлению (0.945792ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 336.6055

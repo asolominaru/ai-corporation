@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-11-06T07:23:47.065918+03:00",
+  "files": {
+    "services/orchestrator/app/db.py": "b7da9ddc48ffee71007a437dcf2c4b1eb80939bca72dad5044ea237554eb41e4",
+    "services/orchestrator/app/config.py": "ab7d94a81752d5de47c4f3ea31c803d656554c9cfb0d5be32a7206d9a92c571f",
+    "services/orchestrator/app/audit.py": "c7bd5461ad3e5325389af32af05698cf8fa3471f874200a07fc13c5ba964c58c",
+    "services/orchestrator/app/models.py": "f11d935ca9f3e43bc2bd2684934c1967b42cd6a12bb18dbcda0356b4f8f4bf01",
+    "services/orchestrator/app/__init__.py": "d29fd919ad286c155f307cb8508291012d88efcca927458a5aa021341f9a22a2",
+    "services/orchestrator/app/taskschema.py": "e6c265280c1c06a89e644ea655449504f1d3e6049096d5449ff860f98ad2df2c",
+    "services/orchestrator/app/main.py": "2977e8a4cbcd762daa4144b8a493d08fabd056d7b94975d560d348ebf97dad7d",
+    "services/orchestrator/app/statemachine.py": "61b870eb502094ea9bad55f67ad2176cf6940bf95c9241e57a5b74059fa88b78",
+    "services/orchestrator/tests/test_statemachine.py": "8768592e3779875af723798283552b933b88a41a0a2099e8c560adeb3ce92a28",
+    "services/orchestrator/tests/test_api.py": "d5493c36bbc2cf31df43dd7d68e060b438f34677a113b68727cf708eb0dce8a2",
+    "services/orchestrator/tests/test_regressions_n01_n05.py": "4b74ae30eac2d7b5f12c811823c4d3ccf1586f02da80558a8fa08001d08f5a92",
+    "services/model-router/app/db.py": "09956c7f3c605ff504b327a314b3b15621b5383247d817a8bfe290fde1284e7d",
+    "services/model-router/app/config.py": "58b7e96fabad8fc2a28b04349b5a02ad19d0bbd1785930c86acae4a50fbeac0c",
+    "services/model-router/app/models.py": "d38d11f37219d01d3e14fa1e64edb650f642c13a2b83f9cd4f4b82bd904e2a5a",
+    "services/model-router/app/budget.py": "72c7a012207f8c17f5b814bd694c684bfad4c37dcf7a29e12f5205439b43da17",
+    "services/model-router/app/__init__.py": "d375626cd5d9eb947492a62d792ee2281ffca295bcc9eb209a9a08e39497fc76",
+    "services/model-router/app/providers.py": "50f3e4cd7f48414bdb87699d2568723dc20d999fdb26231c6d1e84bf9a23cfe5",
+    "services/model-router/app/routing.py": "192b61496039f8647cb59f3dcc0a9a9b43c3985c4c71e3c56ffcb27d8a13deac",
+    "services/model-router/app/main.py": "b8a180e2dbb3821e4924a065f37d7fc7249fc063bb984e2aadacd82553ff9016"
+  },
+  "completed_at": "2026-11-06T07:26:05.549614+03:00",
+  "scope": "Offline temporary-copy audit; no paid API or production changes",
+  "supplied_tests": {
+    "orchestrator": 26,
+    "board": 16
+  },
+  "defect_reproductions": {
+    "orchestrator": 3,
+    "router": 5
+  },
+  "bot_checks_passed": 6,
+  "runtime_ports_checked": [
+    3000,
+    4000,
+    8000,
+    8100,
+    8200
+  ],
+  "runtime_listeners_found": [],
+  "files_changed_during_check": [],
+  "bot_owner_id_configured": true,
+  "additional_hashes": {
+    "approval-bot/approvals.py": "c7345fdfa04a1b062abe6dd2abb82921eaea1741057d84ef5e1e124d9e84bb09",
+    "app/src/hooks/useCorporationSim.ts": "1d87d43105a3617afce5a779b024ea06ec6387b02957719fb790258a52b72c98",
+    "app/src/lib/gateway.ts": "4c8f4639b5822784c42c603fa73163b49f5e651bd4afdfe220669a96f6658341",
+    "founder-ai-os/src/board.mjs": "ed1a77d7ba9a9f62c530a1bcdea7afab447f8753666ca49af434ee190c5ca603"
+  }
+}

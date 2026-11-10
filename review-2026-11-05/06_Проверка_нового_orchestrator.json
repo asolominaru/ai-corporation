@@ -1,0 +1,32 @@
+{
+  "checked_at_moscow": "2026-11-05T23:28:24.511816+03:00",
+  "original_suite": {
+    "passed": 17,
+    "failed": 0,
+    "warnings": 1
+  },
+  "independent_reproductions": {
+    "completed_without_report_review_or_owner_approval": true,
+    "cross_tenant_project_and_executor_accepted": true,
+    "negative_cost_and_tokens_accepted": true,
+    "cumulative_cost_0_8_exceeds_0_5_without_block": true,
+    "expired_approval_unverified_caller_accepted": true,
+    "audit_actor_action_tamper_not_detected": true
+  },
+  "scope": "temporary copy with in-memory SQLite; no external requests",
+  "previous_11_hashed_files": "all unchanged",
+  "cron": "one approvals.py entry every minute, quoted Python path",
+  "runtime": "no listening ports 3000/4000/8100/8000 observed in lsof snapshot; Kimi application running",
+  "source_sha256": {
+    "app/db.py": "b7da9ddc48ffee71007a437dcf2c4b1eb80939bca72dad5044ea237554eb41e4",
+    "app/config.py": "85f08de4a2f350f7bc23ea1f97393ae6a887fe330d4abef3a4e2143db55190dd",
+    "app/audit.py": "de4009c5096d18079131256fcccd10079eb8ea8d25291f23a0a1191c06d11e1f",
+    "app/models.py": "ab8d7a406eec863970df29621195d594a33ac3c0346c8445b797b6c28b557566",
+    "app/__init__.py": "d29fd919ad286c155f307cb8508291012d88efcca927458a5aa021341f9a22a2",
+    "app/taskschema.py": "e6c265280c1c06a89e644ea655449504f1d3e6049096d5449ff860f98ad2df2c",
+    "app/main.py": "a70a2ba17d9dbaec483e2b84ab1404ee560d174b4e8c07fa1b4f2ce96eafc06a",
+    "app/statemachine.py": "61b870eb502094ea9bad55f67ad2176cf6940bf95c9241e57a5b74059fa88b78",
+    "tests/test_statemachine.py": "8768592e3779875af723798283552b933b88a41a0a2099e8c560adeb3ce92a28",
+    "tests/test_api.py": "58c8a27362cf42bed5351d0acfbf82187d430c952a31cedced775cc2bb03a480"
+  }
+}
