@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Founder AI OS — Task Protocol v1",
+  "type": "object",
+  "required": ["id", "project", "title", "goal", "inputs", "expected_output", "criteria", "owner"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{1,79}$"},
+    "project": {"type": "string", "description": "id из config/company.json"},
+    "title": {"type": "string", "minLength": 3},
+    "goal": {"type": "string", "minLength": 10, "description": "Зачем: измеримый бизнес-результат"},
+    "why": {"type": "string", "description": "Какую дорогую работу заменяет или какой доход создаёт"},
+    "inputs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "expected_output": {"type": "string", "minLength": 5},
+    "criteria": {"type": "string", "minLength": 5, "description": "Проверяемые критерии приёмки"},
+    "tools_allowed": {"type": "array", "items": {"type": "string"}},
+    "mode": {"enum": ["SOLO", "PAIR", "PARALLEL", "COMPETE", "REVIEW"], "default": "SOLO"},
+    "model_hint": {"type": "string", "description": "Класс модели из config/model-router.json"},
+    "budget_rub": {"type": ["number", "null"], "minimum": 0, "description": "null = платные вызовы заблокированы"},
+    "deadline": {"type": "string", "format": "date"},
+    "owner": {"type": "string", "description": "id роли-исполнителя из org/agents.json"},
+    "human_approval": {"type": "boolean", "default": false, "description": "true = после ревью аудитора требуется подтверждение владельца"},
+    "next_action": {"type": "string"}
+  }
+}

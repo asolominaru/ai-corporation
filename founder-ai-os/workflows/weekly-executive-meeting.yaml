@@ -1,0 +1,44 @@
+# Валидируется по schemas/workflow.schema.json
+code: weekly-executive-meeting
+name: "Weekly Executive Meeting"
+version: 1
+department: executive
+trigger:
+  type: schedule
+  source: "17 8 * * 1"   # понедельник 08:17 Europe/Moscow (off-peak minute)
+steps:
+  - id: dept_reports
+    type: parallel
+    # каждый подшаг — task dept-weekly-report для активных отделов;
+    # отсутствующий отдел = статус GREY, не ошибка
+    depends_on: []
+    sla_hours: 2
+  - id: synthesis
+    type: task
+    task_template: weekly-synthesis
+    assignee_role: ai_ceo
+    depends_on: [dept_reports]
+    # cross-department analysis, conflict detection, bottleneck, financial effect, prioritization
+  - id: decision_pack
+    type: task
+    task_template: weekly-decision-pack
+    assignee_role: ai_ceo
+    depends_on: [synthesis]
+  - id: owner_decisions
+    type: approval
+    approval_type: public_statement   # временно; выделить тип owner_weekly_decisions при реализации
+    depends_on: [decision_pack]
+    sla_hours: 72
+    # блок DECISIONS REQUIRED FROM ANASTASIA, максимум 5–7 пунктов
+  - id: create_tasks
+    type: action
+    depends_on: [owner_decisions]
+    # orchestrator: каждое решение -> задача (owner, deadline, KPI, контроль на следующей неделе)
+done_definition:
+  description: "Weekly Executive Decision Pack сохранён, каждое решение превращено в задачу с владельцем и дедлайном; ни одно решение не осталось только в тексте"
+  evidence:
+    - "документ decision pack в documents"
+    - "задачи созданы и связаны с decisions"
+    - "блок решений собственника отправлен, ответы зафиксированы"
+kpis: [decisions_closed_within_week, tasks_from_pack_completed]
+timeout_hours: 96

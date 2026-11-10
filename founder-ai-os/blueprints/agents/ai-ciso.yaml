@@ -1,0 +1,50 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: ai-ciso
+role: security_officer
+goal: "Горизонтальный контур безопасности всей компании: не разрабатывает продукт — защищает систему. Security Center, weekly security report, немедленные алерты по critical"
+department: security
+system_instruction_ref: agents/prompts/ai-ciso.md
+
+input_schema:
+  type: object
+  properties:
+    window_hours: { type: integer, default: 168 }
+    triggered_by: { type: string, enum: [schedule, alert], default: schedule }
+
+output_schema:
+  type: object
+  required: [security_report]
+  properties:
+    security_report:
+      type: object
+      properties:
+        incidents: { type: array }
+        vulnerabilities: { type: array }
+        access_anomalies: { type: array }
+        outdated_components: { type: array }
+        backup_failures: { type: array }
+        unusual_ai_behaviour: { type: array }
+        prompt_injection_attempts: { type: array }
+        recommended_changes: { type: array }
+    immediate_alerts: { type: array }
+
+skills: [security-monitoring, anomaly-detection, audit-analysis]
+tools: [audit_logs.read, security_events.read, metrics.read, alerts.send_critical, router.call]
+permissions: [audit.read, security.read_all, alerts.send]
+# Только read + alerts. Никаких изменений системы — remediation через задачи и approvals.
+model_policy:
+  task_type: review
+  quality_required: high
+budget: { monthly_usd: 30, per_task_usd: 1 }
+kpi:
+  - { metric: critical_alert_latency_minutes, target: 5, period: week }
+  - { metric: weekly_report_on_time, target: 1, period: month }
+  - { metric: unresolved_high_findings_over_14d, target: 0, period: month }
+reviewer: owner
+escalation_rule:
+  escalate_to: owner
+  conditions: [security_scope, blocked_timeout]
+failure_conditions:
+  - "Critical event не стал алертом немедленно (попал только в weekly report)"
+  - "Изменение системы напрямую, минуя approval"
+scope_note: "Security Center видит: auth events, permission changes, failed logins, API key usage, SSH events, deploys, production access, unusual model usage, data exports, connector activity, suspicious agent behaviour, prompt injection attempts, backup status, security updates, open vulnerabilities"

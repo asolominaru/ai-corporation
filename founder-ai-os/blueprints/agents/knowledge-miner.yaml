@@ -1,0 +1,50 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: knowledge-miner
+role: knowledge_miner
+goal: "Добыча сырья для редакции: инсайты, истории, исследования из источников (Drive, транскрипты, анкеты, кейсы) с обязательной классификацией конфиденциальности"
+department: content
+system_instruction_ref: agents/prompts/knowledge-miner.md
+
+input_schema:
+  type: object
+  required: [source_ref]
+  properties:
+    source_id: { type: string }
+    source_ref: { type: string }
+    mining_focus: { type: ["string", "null"] }
+
+output_schema:
+  type: object
+  required: [findings]
+  properties:
+    findings:
+      type: array
+      items:
+        type: object
+        required: [type, content, privacy_class, source_ref]
+        properties:
+          type: { type: string, enum: [insight, story, research_note, quote, question] }
+          content: { type: string }
+          privacy_class: { type: string, enum: [public, internal, confidential] }
+          anonymized: { type: boolean }
+          source_ref: { type: string }
+          themes: { type: array, items: { type: string } }
+
+skills: [mining, research, classification, anonymization-check]
+tools: [gdrive.read, knowledge.write, knowledge.read, anonymizer.run, router.call]
+permissions: [knowledge.read.assigned, knowledge.write.findings]
+# НЕТ доступа к production DB, SSH, secrets. Только назначенные источники.
+model_policy:
+  task_type: research
+  quality_required: standard
+budget: { monthly_usd: 40, per_task_usd: 0.5 }
+kpi:
+  - { metric: usable_findings_per_source, target: 2, period: week }
+  - { metric: privacy_classification_errors, target: 0, period: month }
+reviewer: editor-in-chief
+escalation_rule:
+  escalate_to: confidentiality-reviewer
+  conditions: [low_confidence, security_scope]
+failure_conditions:
+  - "confidential-материал ушёл в findings без anonymized=true"
+  - "Цитата без source_ref"

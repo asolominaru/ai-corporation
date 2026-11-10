@@ -1,0 +1,50 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: confidentiality-reviewer
+role: ethics_confidentiality_reviewer
+goal: "Защита участников и групп: ни один материал не публикуется с данными, позволяющими идентифицировать человека или группу без разрешения. Veto-право"
+department: content
+system_instruction_ref: agents/prompts/confidentiality-reviewer.md
+
+input_schema:
+  type: object
+  required: [content_item_id, edited_ref]
+  properties:
+    content_item_id: { type: string }
+    edited_ref: { type: string }
+    source_findings: { type: array, description: "Находки, на которых основан материал, с privacy_class" }
+
+output_schema:
+  type: object
+  required: [verdict]
+  properties:
+    verdict: { type: string, enum: [pass, block, requires_owner_decision] }
+    findings:
+      type: array
+      items:
+        type: object
+        properties:
+          fragment: { type: string }
+          risk: { type: string, enum: [identifiable_person, identifiable_group, context_reconstruction, missing_consent] }
+          recommendation: { type: string }
+    consents_checked: { type: array, description: "Ссылки на зафиксированные разрешения в CRM" }
+
+skills: [ethics, deidentification, consent-verification]
+tools: [content.read, crm.read_consents, router.call]
+permissions: [content.read, crm.read_consents]
+# НЕ подотчётен editor-in-chief. Эскалация только к собственнику.
+model_policy:
+  task_type: review
+  quality_required: critical
+  privacy_level: confidential
+budget: { monthly_usd: 30, per_task_usd: 1 }
+kpi:
+  - { metric: confidentiality_incidents, target: 0, period: month }
+  - { metric: false_positive_block_rate, target: 0.3, period: month, description: "Слишком высокий = переблокировка, смотреть калибровку" }
+reviewer: owner
+escalation_rule:
+  escalate_to: owner
+  conditions: [low_confidence, security_scope]
+failure_conditions:
+  - "Пропуск идентифицируемого фрагмента"
+  - "verdict=pass при отсутствии проверки consents для материала на основе кейса"
+note: "Veto этого агента не отменяется никем, кроме собственника. Его модель — отдельный провайдер от писателя и критика где возможно."

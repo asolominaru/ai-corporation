@@ -1,25 +1,107 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Founder AI OS — Task Protocol v1",
+  "$id": "https://founder-ai-os/schemas/task.schema.json",
+  "title": "Task Protocol",
   "type": "object",
-  "required": ["id", "project", "title", "goal", "inputs", "expected_output", "criteria", "owner"],
-  "additionalProperties": false,
+  "required": ["task_id", "tenant_id", "project_id", "department", "goal", "why", "expected_output", "acceptance_criteria", "reviewer", "budget"],
   "properties": {
-    "id": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9_-]{1,79}$"},
-    "project": {"type": "string", "description": "id из config/company.json"},
-    "title": {"type": "string", "minLength": 3},
-    "goal": {"type": "string", "minLength": 10, "description": "Зачем: измеримый бизнес-результат"},
-    "why": {"type": "string", "description": "Какую дорогую работу заменяет или какой доход создаёт"},
-    "inputs": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-    "expected_output": {"type": "string", "minLength": 5},
-    "criteria": {"type": "string", "minLength": 5, "description": "Проверяемые критерии приёмки"},
-    "tools_allowed": {"type": "array", "items": {"type": "string"}},
-    "mode": {"enum": ["SOLO", "PAIR", "PARALLEL", "COMPETE", "REVIEW"], "default": "SOLO"},
-    "model_hint": {"type": "string", "description": "Класс модели из config/model-router.json"},
-    "budget_rub": {"type": ["number", "null"], "minimum": 0, "description": "null = платные вызовы заблокированы"},
-    "deadline": {"type": "string", "format": "date"},
-    "owner": {"type": "string", "description": "id роли-исполнителя из org/agents.json"},
-    "human_approval": {"type": "boolean", "default": false, "description": "true = после ревью аудитора требуется подтверждение владельца"},
-    "next_action": {"type": "string"}
-  }
+    "task_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string", "format": "uuid" },
+    "project_id": { "type": "string", "format": "uuid" },
+    "department": { "type": "string", "enum": ["development", "sales", "content", "product", "operations", "client_success", "rnd", "executive"] },
+    "parent_task_id": { "type": ["string", "null"], "format": "uuid" },
+    "workflow_run_id": { "type": ["string", "null"], "format": "uuid" },
+    "goal": { "type": "string", "minLength": 10 },
+    "why": { "type": "string", "minLength": 10, "description": "Бизнес-причина. Задача без why не создаётся." },
+    "input": { "type": "object", "default": {} },
+    "context": {
+      "type": "object",
+      "properties": {
+        "knowledge_refs": { "type": "array", "items": { "type": "string" } },
+        "related_tasks": { "type": "array", "items": { "type": "string", "format": "uuid" } },
+        "external_refs": { "type": "array", "items": { "type": "string", "format": "uri" } }
+      },
+      "default": {}
+    },
+    "expected_output": {
+      "type": "object",
+      "required": ["type", "description"],
+      "properties": {
+        "type": { "type": "string", "enum": ["code_change", "document", "analysis", "decision", "deal_result", "deployment", "dataset"] },
+        "description": { "type": "string", "minLength": 10 },
+        "artifacts": { "type": "array", "items": { "type": "string" }, "description": "Ожидаемые файлы/артефакты" }
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "description"],
+        "properties": {
+          "type": { "type": "string", "enum": ["test", "command", "http_check", "file_exists", "metric", "human_review"] },
+          "description": { "type": "string" },
+          "command": { "type": "string", "description": "Для type=command: команда, exit code 0 = pass" },
+          "url": { "type": "string", "description": "Для type=http_check" },
+          "expected_status": { "type": "integer" },
+          "path": { "type": "string", "description": "Для type=file_exists" },
+          "metric_code": { "type": "string" },
+          "threshold": { "type": "number" }
+        }
+      }
+    },
+    "tools_allowed": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "permissions": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "mode": { "type": "string", "enum": ["SOLO", "PAIR", "PARALLEL", "REVIEW", "COMPETE"], "default": "REVIEW" },
+    "primary_model": { "type": ["string", "null"] },
+    "fallback_model": { "type": ["string", "null"] },
+    "budget": {
+      "type": "object",
+      "required": ["max_usd"],
+      "properties": {
+        "max_usd": { "type": "number", "exclusiveMinimum": 0 },
+        "max_tokens": { "type": ["integer", "null"] }
+      }
+    },
+    "deadline": { "type": ["string", "null"], "format": "date-time" },
+    "reviewer": { "type": "string", "description": "agent_id или user_id проверяющего. Не может совпадать с исполнителем." },
+    "retry_policy": {
+      "type": "object",
+      "properties": {
+        "max_attempts": { "type": "integer", "minimum": 1, "maximum": 5, "default": 2 },
+        "backoff_seconds": { "type": "integer", "default": 300 }
+      },
+      "default": { "max_attempts": 2, "backoff_seconds": 300 }
+    },
+    "escalation_policy": {
+      "type": "object",
+      "properties": {
+        "escalate_to": { "type": "string" },
+        "after_attempts": { "type": "integer", "default": 2 },
+        "on_budget_exceeded": { "type": "boolean", "default": true }
+      },
+      "default": {}
+    },
+    "requires_human_approval": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["payment", "contract", "destructive_db", "dns", "auth_change", "secrets", "data_deletion", "high_risk_deploy", "public_statement"] },
+      "default": []
+    },
+    "next_action": {
+      "type": ["object", "null"],
+      "properties": {
+        "workflow_code": { "type": "string" },
+        "task_template": { "type": "string" },
+        "payload": { "type": "object" }
+      },
+      "default": null
+    },
+    "status": {
+      "type": "string",
+      "enum": ["created", "queued", "running", "blocked", "review", "rework", "approved", "failed", "completed", "cancelled"],
+      "default": "created",
+      "description": "Управляется только orchestrator'ом"
+    }
+  },
+  "additionalProperties": false
 }

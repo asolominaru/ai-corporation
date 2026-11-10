@@ -1,0 +1,50 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: sales-agent
+role: sales_agent
+goal: "Ведение лида от квалификации до результата: персонализированный контакт, follow-up, встреча, предложение — до оплаченной сделки или зафиксированного отказа"
+department: sales
+system_instruction_ref: agents/prompts/sales-agent.md
+
+input_schema:
+  type: object
+  required: [lead_id]
+  properties:
+    lead_id: { type: string }
+    qualification: { type: object }
+    history: { type: array }
+
+output_schema:
+  type: object
+  required: [outcome]
+  properties:
+    outcome:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [deal_won, meeting_booked, follow_up_scheduled, lost] }
+        lost_reason: { type: ["string", "null"] }
+        next_contact_date: { type: ["string", "null"], format: date }
+        probability: { type: ["number", "null"] }
+    messages_sent: { type: array }
+
+skills: [sales-copywriting, objection-handling, crm-management]
+tools: [crm.read, crm.write, telegram.send_approved, gmail.send_approved, router.call]
+permissions: [crm.read, crm.write, outbound.draft_only]
+# ВАЖНО: исходящие сообщения — только draft + human approval (public_statement).
+# Прямая отправка запрещена permissions outbound.draft_only.
+model_policy:
+  task_type: writing
+  quality_required: standard
+budget: { monthly_usd: 50, per_task_usd: 1 }
+kpi:
+  - { metric: meetings_booked, target: 4, period: month }
+  - { metric: deals_won, target: 1, period: month }
+  - { metric: followup_sla_compliance, target: 0.95, period: week }
+reviewer: ai-ceo
+escalation_rule:
+  escalate_to: owner
+  conditions: [low_confidence, security_scope]
+failure_conditions:
+  - "Отправка сообщения без approval"
+  - "Лид закрыт без lost_reason/next_contact_date"
+  - "Обещания клиенту, не согласованные с продуктом"

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founder-ai-os/schemas/agent.schema.json",
+  "title": "AI Agent Definition",
+  "type": "object",
+  "required": ["agent_id", "role", "goal", "department", "input_schema", "output_schema", "model_policy", "permissions", "budget", "kpi", "reviewer", "escalation_rule"],
+  "properties": {
+    "agent_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "role": { "type": "string", "description": "Ссылка на agent_roles.code" },
+    "goal": { "type": "string", "minLength": 10 },
+    "department": { "type": "string" },
+    "system_instruction_ref": { "type": "string", "description": "Путь к файлу system instruction в /agents" },
+    "input_schema": { "type": "object", "description": "JSON Schema входа агента" },
+    "output_schema": { "type": "object", "description": "JSON Schema законченного продукта агента" },
+    "skills": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Whitelist tool ids из connector/manifests. Пустой массив = нет инструментов.",
+      "default": []
+    },
+    "model_policy": {
+      "type": "object",
+      "required": ["task_type"],
+      "properties": {
+        "task_type": { "type": "string" },
+        "quality_required": { "type": "string", "enum": ["low", "standard", "high", "critical"], "default": "standard" },
+        "preferred_model": { "type": ["string", "null"], "default": null },
+        "fallback_model": { "type": ["string", "null"], "default": null },
+        "max_context": { "type": ["integer", "null"], "default": null }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Permission codes, напр. deploy.staging, crm.write"
+    },
+    "budget": {
+      "type": "object",
+      "required": ["monthly_usd"],
+      "properties": {
+        "monthly_usd": { "type": "number", "exclusiveMinimum": 0 },
+        "per_task_usd": { "type": ["number", "null"], "default": null }
+      }
+    },
+    "kpi": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["metric", "target"],
+        "properties": {
+          "metric": { "type": "string" },
+          "target": { "type": ["number", "string"] },
+          "period": { "type": "string", "enum": ["day", "week", "month"], "default": "week" }
+        }
+      }
+    },
+    "reviewer": { "type": "string", "description": "agent_id или user_id. Обязателен и не может быть самим агентом." },
+    "escalation_rule": {
+      "type": "object",
+      "required": ["escalate_to"],
+      "properties": {
+        "escalate_to": { "type": "string" },
+        "conditions": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["budget_exceeded", "rework_cycles_exceeded", "blocked_timeout", "low_confidence", "security_scope"] },
+          "minItems": 1
+        }
+      }
+    },
+    "failure_conditions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Условия, при которых агент считается неработающим",
+      "default": []
+    },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "log_all_tool_calls": { "type": "boolean", "default": true },
+        "log_full_prompts": { "type": "boolean", "default": false, "description": "Включать только для отладки; содержит данные" }
+      },
+      "default": { "log_all_tool_calls": true, "log_all_prompts": false }
+    }
+  },
+  "additionalProperties": false
+}

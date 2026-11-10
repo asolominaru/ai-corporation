@@ -1,0 +1,81 @@
+# Валидируется по schemas/workflow.schema.json
+code: editorial-pipeline
+name: "Редакционный конвейер «Сила малых групп»"
+version: 1
+department: content
+trigger:
+  type: manual
+  # также запускается событием ingestion.completed из knowledge layer
+steps:
+  - id: ingest
+    type: task
+    task_template: editorial-ingest
+    assignee_role: knowledge_miner
+    sla_hours: 24
+  - id: mining
+    type: task
+    task_template: editorial-mining
+    assignee_role: knowledge_miner
+    depends_on: [ingest]
+  - id: idea
+    type: task
+    task_template: editorial-idea
+    assignee_role: knowledge_miner
+    depends_on: [mining]
+  - id: prioritize
+    type: task
+    task_template: editorial-prioritize
+    assignee_role: content_director
+    depends_on: [idea]
+    sla_hours: 48
+  - id: draft
+    type: task
+    task_template: editorial-draft
+    assignee_role: writer
+    depends_on: [prioritize]
+    on_failure: retry
+  - id: voice
+    type: task
+    task_template: editorial-voice
+    assignee_role: voice_editor
+    depends_on: [draft]
+  - id: critic
+    type: task
+    task_template: editorial-critic
+    assignee_role: content_critic
+    depends_on: [voice]
+    # verdict=rework -> orchestrator возвращает на draft (max 2 цикла)
+  - id: confidentiality
+    type: task
+    task_template: editorial-confidentiality
+    assignee_role: ethics_confidentiality_reviewer
+    depends_on: [critic]
+    on_failure: escalate
+    # verdict=block -> workflow fails; veto не отменяется
+  - id: owner_approval
+    type: approval
+    approval_type: public_statement
+    depends_on: [confidentiality]
+  - id: publish
+    type: task
+    task_template: editorial-publish
+    assignee_role: distribution_growth
+    depends_on: [owner_approval]
+  - id: measure
+    type: wait
+    depends_on: [publish]
+    wait_for: { duration: 168h }   # неделя измерений
+  - id: analytics
+    type: task
+    task_template: editorial-analytics
+    assignee_role: distribution_growth
+    depends_on: [measure]
+done_definition:
+  description: "Опубликованный качественный материал с заполненной карточкой (source, theme, audience, product, funnel_stage, CTA, канал, дата) и измеренными результатами (leads, reactions, meetings, pipeline), плюс сохранённый интеллектуальный материал в Knowledge Base"
+  evidence:
+    - "content_items.status = 'published' ИЛИ 'measuring'"
+    - "запись публикации с URL и UTM"
+    - "approval record (public_statement) approved"
+    - "метрики leads/reactions записаны в metrics"
+kpis: [published_per_week, leads_from_content, assets_per_source, voice_match_score]
+timeout_hours: 720

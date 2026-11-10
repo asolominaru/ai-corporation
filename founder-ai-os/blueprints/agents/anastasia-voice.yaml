@@ -1,0 +1,39 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: anastasia-voice
+role: voice_editor
+goal: "Приведение текста к голосу Анастасии: лексика, ритм, характер, убрать всё нехарактерное; финальная редактура перед критиком"
+department: content
+system_instruction_ref: agents/prompts/anastasia-voice.md
+
+input_schema:
+  type: object
+  required: [content_item_id, draft_ref]
+  properties:
+    content_item_id: { type: string }
+    draft_ref: { type: string }
+
+output_schema:
+  type: object
+  required: [edited_ref, voice_diff_summary]
+  properties:
+    edited_ref: { type: string }
+    voice_diff_summary: { type: string, description: "Что изменено и почему — для калибровки" }
+
+skills: [editing, voice-matching, style]
+tools: [knowledge.read_voice_reference, content.write_draft, router.call]
+permissions: [knowledge.read.voice_reference, content.write_draft]
+# voice-reference — корпус эталонных текстов Анастасии (acl_tag voice-reference)
+model_policy:
+  task_type: writing
+  quality_required: high
+budget: { monthly_usd: 40, per_task_usd: 1 }
+kpi:
+  - { metric: voice_match_score, target: 8, period: month, description: "Оценка quality-critic по оси Brand Fit" }
+  - { metric: owner_rewrite_rate, target: 0.2, period: month, description: "Доля материалов, которые собственник переписывает сама" }
+reviewer: quality-critic
+escalation_rule:
+  escalate_to: editor-in-chief
+  conditions: [rework_cycles_exceeded]
+failure_conditions:
+  - "Голос изменён в сторону 'универсального экспертного стиля'"
+  - "Потерян смысл утверждения из draft при правке"

@@ -1,0 +1,40 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: distribution-growth
+role: distribution_growth
+goal: "Публикация по approve, дистрибуция, CTA, атрибуция лидов к материалам, аналитика эффективности контента до pipeline"
+department: content
+system_instruction_ref: agents/prompts/distribution-growth.md
+
+input_schema:
+  type: object
+  required: [content_item_id]
+  properties:
+    content_item_id: { type: string }
+    approved: { type: boolean }
+    channel: { type: string }
+
+output_schema:
+  type: object
+  properties:
+    publication: { type: object, properties: { channel: { type: string }, url: { type: string }, published_at: { type: string }, utm: { type: object } } }
+    performance_report: { type: object, properties: { reactions: { type: integer }, leads: { type: integer }, meetings: { type: integer }, pipeline: { type: number } } }
+    repurpose_suggestions: { type: array }
+
+skills: [distribution, analytics, attribution]
+tools: [telegram.publish_approved, content.change_status, crm.read, crm.write_attribution, metrics.write, router.call]
+permissions: [content.publish_approved, crm.read, metrics.write]
+# Публикация ТОЛЬКО при approved=true (после owner approval). Сам approval дать не может.
+model_policy:
+  task_type: classification
+  quality_required: standard
+budget: { monthly_usd: 30, per_task_usd: 0.5 }
+kpi:
+  - { metric: leads_from_content, target: 5, period: month }
+  - { metric: attribution_coverage, target: 0.8, period: month, description: "Доля лидов с известным content_item_id" }
+reviewer: editor-in-chief
+escalation_rule:
+  escalate_to: editor-in-chief
+  conditions: [blocked_timeout]
+failure_conditions:
+  - "Публикация без owner approval в audit_logs"
+  - "Материал published без CTA и UTM"

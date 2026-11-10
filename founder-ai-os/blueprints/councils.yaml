@@ -1,0 +1,60 @@
+# Четыре совета компании (§65–70). Машинно-читаемый каталог.
+# ЖЁСТКОЕ ПРАВИЛО: оптики построены только на публичных книгах, интервью,
+# акционерных письмах, выступлениях и проверяемых кейсах. Система НЕ утверждает,
+# что реальные люди участвуют в компании, НЕ имитирует их личности и НЕ придумывает
+# их мнение. Lens = документированный паттерн мышления + источники.
+
+councils:
+
+  executive:
+    question: "Что делать сейчас?"
+    trigger: weekly   # weekly-executive-meeting workflow
+    composition: [ai-ceo, cfo, cro, cmo, cpo, cto, coo, ai-ciso, chief-decision-scientist]
+    output: weekly_executive_decision_pack
+
+  entrepreneurial:
+    question: "Где деньги и масштаб?"
+    trigger: on_demand   # новая бизнес-модель, ценообразование, большие инвестиции,
+                         # новый продукт, смена стратегии, закрытие проекта, масштабирование
+    process: [fact_pack, financial_model, customer_evidence, lenses_3_to_5, critique, contradictions, decision_options]
+    output: "OPTION A/B/C + expected value + risks + reversibility + recommendation + evidence (формирует AI CEO; НЕ голосование)"
+    lenses:
+      - { id: hartmann,    name: "Оскар Хартманн",   optics: "скорость действия, портфель гипотез, массовое тестирование, закрытие неработающего, асимметричные возможности", key_question: "Что мы можем проверить быстрее и дешевле прямо сейчас?" }
+      - { id: kuchment,    name: "Михаил Кучмент",   optics: "эффективность, P&L, расходы, омниканальность, фокус, производительность капитала", key_question: "Как сделать эту модель экономически эффективнее?" }
+      - { id: sedov,       name: "Владимир Седов / Askona", optics: "глубокая потребительская боль, вертикальная интеграция, долгий горизонт, экосистемы", key_question: "Какую потребность клиента мы ещё не увидели?" }
+      - { id: galitsky,    name: "Сергей Галицкий",  optics: "клиент, ритейл-экономика, простота, масштаб, операционная дисциплина", key_question: "Что реально важно покупателю и можно ли это масштабировать?" }
+      - { id: gref,        name: "Герман Греф",      optics: "цифровая трансформация, технологии, AI, организационное масштабирование, метрики", key_question: "Как превратить это из локального проекта в систему?" }
+      - { id: fridman,     name: "Михаил Фридман",   optics: "капитал, сделки, структура собственности, портфель, risk/reward", key_question: "Стоит ли этот актив вложенного капитала и риска?" }
+      - { id: bezos,       name: "Jeff Bezos",       optics: "customer obsession, long-term, flywheel, free cash flow, high-velocity decisions", key_question: "Что станет лучше для клиента, если мы сделаем это?" }
+      - { id: huang,       name: "Jensen Huang",     optics: "platform shift, technology inflection points, долгий горизонт, скорость исполнения, экосистема", key_question: "Это локальная функция или новая технологическая платформа?" }
+      - { id: collison,    name: "Patrick Collison", optics: "economic infrastructure, developer experience, internet economics, removing friction", key_question: "Как убрать ещё один слой трения для клиента?" }
+      - { id: lutke,       name: "Tobi Lütke",       optics: "entrepreneur platform, product engineering, merchant success, ecosystem", key_question: "Помогает ли наш продукт клиенту самому больше зарабатывать?" }
+      - { id: chesky,      name: "Brian Chesky",     optics: "product experience, design, trust, community, founder-led product", key_question: "Какой опыт получает человек от начала до конца?" }
+      - { id: hastings,    name: "Reed Hastings",    optics: "talent density, context over control, organizational speed, culture", key_question: "Нужен ли здесь контроль или достаточно правильного контекста и сильного человека?" }
+
+  creative:
+    question: "Что ещё возможно?"
+    trigger: on_demand   # важные продуктовые/стратегические задачи, до оценки реалистичности
+    rule: "Первые 20% процесса ограничения не обсуждаются. Divergence до convergence. Совет НЕ утверждает инвестиции."
+    process:
+      - "минимум 10 существенно различных направлений"
+      - "аналогии из других индустрий"
+      - "стресс-вопросы: без текущей бизнес-модели? / в 10 раз дешевле? / в 10 раз дороже? / без людей? / без интерфейса? / оплата только за результат? / почти нулевой капитал?"
+      - "после divergence: Product Council → Finance → Customer Research → Technical Feasibility → TEST"
+    lenses:
+      - { id: ive,      name: "Jony Ive",      optics: "простота, целостность, качество продукта" }
+      - { id: catmull,  name: "Ed Catmull",    optics: "творческая среда, честная обратная связь, усиление слабой идеи" }
+      - { id: chesky_c, name: "Brian Chesky",  optics: "дизайн опыта и бизнеса одновременно" }
+      - { id: bezos_c,  name: "Jeff Bezos",    optics: "идеи вокруг будущих потребностей клиента" }
+      - { id: rubin,    name: "Rick Rubin",    optics: "отсечение лишнего, сила сути" }
+      - { id: dyson,    name: "James Dyson",   optics: "экспериментирование и прототипы" }
+      - { id: jobs,     name: "Steve Jobs",    optics: "историческая продуктовая оптика: технология × продукт × человеческий опыт" }
+    internal_roles: [futurist, crazy-ideas-agent, cross-industry-analogy-agent, business-model-inventor, technology-scout, customer-future-agent]
+
+  risk_audit:
+    question: "Почему это может провалиться?"
+    trigger: before_major_decision
+    composition: [ai-ciso, reviewer-auditor, financial-auditor]
+    output: "риски по severity + kill criteria + что должно быть правдой, чтобы решение оказалось неверным"
+
+separation_rule: "Советы не смешиваются в одном запуске. Иначе творческая идея будет убита финансистом на первой минуте, либо безумная идея уйдёт в производство без проверки."

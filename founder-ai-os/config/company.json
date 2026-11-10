@@ -2,56 +2,69 @@
   "tenant": "anastasia",
   "company": "КОРПОРАЦИЯ Анастасии Соломиной",
   "created": "2026-11-02",
-  "blueprint_version": "1.0",
-  "source_of_directions": "Решение владельца от 26.10.2026 (knowledge/portfolio-owner-decision-2026-10-26.md)",
+  "blueprint_version": "1.1",
+  "source_of_directions": "Решение владельца от 26.10.2026 (knowledge/portfolio-owner-decision-2026-10-26.md) + слияние с blueprints/company.yaml — решение владельца 06.11.2026 (approval feb7741b, «Слияние: 7 направлений»)",
   "projects": [
     {
       "id": "proy",
       "name": "Проявленность",
+      "blueprint_code": "proyavlennost",
       "channels": ["Сила малых групп"],
       "data_scope": "public_and_internal_business_only"
     },
     {
       "id": "yardniki",
       "name": "ЯРДНИКИ",
+      "blueprint_code": "yardniki",
       "channels": [],
       "data_scope": "public_and_internal_business_only"
     },
     {
       "id": "vforume",
       "name": "ВФОРУМЕ",
+      "blueprint_code": "vforume",
       "channels": [],
       "data_scope": "public_and_internal_business_only"
     },
     {
       "id": "ai-learning",
       "name": "Обучение ИИ",
+      "blueprint_code": "ai-learning",
       "channels": [],
       "data_scope": "public_and_internal_business_only"
     },
     {
       "id": "brandfactory",
       "name": "BrandFactory",
+      "blueprint_code": "brandfactory",
       "channels": [],
       "data_scope": "public_and_internal_business_only"
     },
     {
       "id": "personal-practice",
       "name": "Анастасия Соломина — личная практика",
+      "blueprint_code": "personal-brand",
       "channels": [],
       "data_scope": "public_offers_only",
       "note": "Содержимое консультаций в общий журнал не включается"
+    },
+    {
+      "id": "rnd-lab",
+      "name": "R&D / Startup Lab",
+      "blueprint_code": "rnd-lab",
+      "channels": [],
+      "data_scope": "public_and_internal_business_only",
+      "note": "Kill-критерий обязателен для каждой инициативы"
     }
   ],
   "meta_projects": [
     {
       "id": "core",
       "name": "Founder AI OS — ядро системы",
-      "note": "Служебный проект для инфраструктурных задач самой системы; не бизнес-направление и не изменение реестра шести направлений"
+      "note": "Служебный проект для инфраструктурных задач самой системы; не бизнес-направление и не изменение реестра семи направлений"
     }
   ],
   "capabilities": {
-    "rnd": "Сквозная функция, не отдельное направление; kill-критерий обязателен",
     "content_and_growth": "Общий департамент контента для всех направлений",
     "decision_science": "Вероятности, графы, симуляции, арена моделей"
   },

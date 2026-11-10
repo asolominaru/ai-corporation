@@ -131,24 +131,35 @@ export class Board {
     });
   }
 
-  approve(id, note) {
+  // K-11: финальное решение владельца обязано ссылаться на sha256
+  // просмотренной версии и перепроверять файл непосредственно перед решением.
+  _verifyArtifact(t, expectedHash) {
+    if (!expectedHash || expectedHash !== t.hash)
+      throw Error('Устаревшее решение: укажите sha256 просмотренной версии');
+    if (sha256(readFileSync(resolve(this.root, t.artifact))) !== t.hash)
+      throw Error('Артефакт изменился после ревью — требуется новое ревью');
+  }
+
+  approve(id, expectedHash, note) {
     return this.tx(() => {
       const t = this.task(id);
       if (t.status !== 'pending_owner') throw Error('Задача не ожидает решения владельца');
+      this._verifyArtifact(t, expectedHash);
       if (!note?.trim()) throw Error('Нужен комментарий владельца');
       this.db.prepare("UPDATE tasks SET status='accepted' WHERE id=?").run(id);
-      this.event(id, 'owner_approved', {note, by: 'OWNER'});
+      this.event(id, 'owner_approved', {note, by: 'OWNER', hash: t.hash});
       return this.task(id);
     });
   }
 
-  reject(id, note) {
+  reject(id, expectedHash, note) {
     return this.tx(() => {
       const t = this.task(id);
       if (t.status !== 'pending_owner') throw Error('Задача не ожидает решения владельца');
+      this._verifyArtifact(t, expectedHash);
       if (!note?.trim()) throw Error('Нужен комментарий владельца');
       this.db.prepare("UPDATE tasks SET status='changes_requested' WHERE id=?").run(id);
-      this.event(id, 'owner_rejected', {note, by: 'OWNER'});
+      this.event(id, 'owner_rejected', {note, by: 'OWNER', hash: t.hash});
       return this.task(id);
     });
   }
@@ -180,10 +191,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     else if (cmd === 'start') board.start(a[0]);
     else if (cmd === 'submit') console.log(board.submit(a[0], a[1]));
     else if (cmd === 'review') board.review(a[0], a[1], a[2], a[3], a.slice(4).join(' '));
-    else if (cmd === 'approve') board.approve(a[0], a.slice(1).join(' '));
-    else if (cmd === 'reject') board.reject(a[0], a.slice(1).join(' '));
+    else if (cmd === 'approve') board.approve(a[0], a[1], a.slice(2).join(' '));
+    else if (cmd === 'reject') board.reject(a[0], a[1], a.slice(2).join(' '));
     else if (cmd === 'events') console.log(JSON.stringify(board.events(a[0]), null, 2));
-    else throw Error('Команды: list [project] | pending | add task.json | start ID | submit ID outputs/f.md | review ID ROLE SHA256 accepted|changes_requested ПРИЧИНА | approve ID КОММЕНТАРИЙ | reject ID КОММЕНТАРИЙ | events ID');
+    else throw Error('Команды: list [project] | pending | add task.json | start ID | submit ID outputs/f.md | review ID ROLE SHA256 accepted|changes_requested ПРИЧИНА | approve ID SHA256 КОММЕНТАРИЙ | reject ID SHA256 КОММЕНТАРИЙ | events ID');
   } catch (e) { console.error(e.message); process.exitCode = 1; }
   finally { board.close(); }
 }

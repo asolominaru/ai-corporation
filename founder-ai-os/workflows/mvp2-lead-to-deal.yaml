@@ -1,0 +1,43 @@
+# Валидируется по schemas/workflow.schema.json
+code: mvp2-lead-to-deal
+name: "MVP-2: лид → результат (сделка или зафиксированный отказ)"
+version: 1
+department: sales
+trigger:
+  type: event
+  source: n8n-webhook-lead   # также: CTA из контента редакции (P3)
+steps:
+  - id: research
+    type: task
+    task_template: lead-research
+    assignee_role: lead_researcher
+    sla_hours: 24
+  - id: qualify
+    type: condition
+    depends_on: [research]
+    condition: { field: qualification.icp_fit, equals: true }
+    # false -> фиксация отказа (lost, reason=not_icp) и завершение
+  - id: contact
+    type: task
+    task_template: lead-contact
+    assignee_role: sales_agent
+    depends_on: [qualify]
+    # исходящее сообщение — только draft + owner approval
+  - id: follow_up
+    type: wait
+    depends_on: [contact]
+    wait_for: { until_event: lead_reply, duration: 72h }
+    # по таймауту — повторный follow-up (max 3, потом lost/no_reply)
+  - id: close
+    type: task
+    task_template: lead-close
+    assignee_role: sales_agent
+    depends_on: [follow_up]
+    sla_hours: 48
+done_definition:
+  description: "Оплаченная сделка ИЛИ чётко зафиксированный отказ: reason, next_contact_date, probability, данные"
+  evidence:
+    - "deals.status IN ('won','lost')"
+    - "при lost: заполнены lost_reason, next_contact_date, probability"
+kpis: [deals_won, meetings_booked, followup_sla_compliance]
+timeout_hours: 720

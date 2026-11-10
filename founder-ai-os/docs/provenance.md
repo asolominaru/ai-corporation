@@ -10,3 +10,10 @@
 | `config/model-router.json`, `schemas/task.schema.json`, `blueprints/*`, `AGENTS.md`, `CODEX_MASTER_INSTRUCTION.md` | Новые, по содержанию чата-источника |
 
 Исходные материалы в `/Users/solominaag/КОРПОРАЦИЯ` не изменялись. Цифры референс-компаний и названия моделей из чата-источника не перепроверялись.
+
+## Решения владельца через approval-бот
+
+| Дата | Запрос | Решение | Применено |
+|---|---|---|---|
+| 05.11.2026 | `2dd9ae47` — P0: бюджет и порядок MVP | «Утверждаю оба пункта»: инфраструктура ~$50–80/мес + AI API потолок $15/день; порядок P0 foundation → P1 редакция «Сила малых групп» → P2 Control Tower → P3 Sales → P4 Codex+Claude | `docs/ROADMAP.md` |
+| 06.11.2026 | `feb7741b` — K-13: карта направлений | «Слияние: 7 направлений»: 5 контуров blueprint + Обучение ИИ + BrandFactory; R&D/Startup Lab — направление (kill-критерий обязателен) | `config/company.json` 1.1, `blueprints/company.yaml` 0.3 |

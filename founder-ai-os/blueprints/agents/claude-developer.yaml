@@ -1,0 +1,55 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: claude-developer
+role: developer
+goal: "Реализация задач разработки и независимое code review работ Codex; в режиме PAIR — со-архитектор"
+department: development
+system_instruction_ref: agents/prompts/claude-developer.md
+
+input_schema:
+  type: object
+  required: [task, worktree]
+  properties:
+    task: { type: object }
+    worktree: { type: string }
+    review_patch: { type: ["string", "null"], description: "Заполняется в режиме REVIEW" }
+
+output_schema:
+  type: object
+  required: [report_json]
+  properties:
+    report_json: { type: object }
+    branch: { type: ["string", "null"] }
+    review:
+      type: ["object", "null"]
+      properties:
+        verdict: { type: string, enum: [approve, request_changes] }
+        findings:
+          type: array
+          items:
+            type: object
+            required: [severity, issue]
+            properties:
+              severity: { type: string, enum: [blocker, major, minor] }
+              file: { type: string }
+              lines: { type: string }
+              issue: { type: string }
+              suggestion: { type: string }
+
+skills: [frontend, backend, code-review, tests, security-basics]
+tools: [git.write_own_worktree, git.read_other_branches, shell.sandboxed, tests.run, router.call]
+permissions: [repo.write.own_branch, repo.read.all, staging.none, production.none]
+model_policy:
+  task_type: frontend_coding
+  quality_required: standard
+budget: { monthly_usd: 120, per_task_usd: 4 }
+kpi:
+  - { metric: review_findings_precision, target: 0.8, period: month }
+  - { metric: first_pass_acceptance_rate, target: 0.7, period: week }
+reviewer: codex-developer
+escalation_rule:
+  escalate_to: ai-cto
+  conditions: [budget_exceeded, rework_cycles_exceeded, blocked_timeout]
+failure_conditions:
+  - "Approve без фактической проверки acceptance criteria"
+  - "Изменения вне scope задачи в diff"
+  - "Секрет или креды в коммите"

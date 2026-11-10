@@ -1,0 +1,40 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: editor-in-chief
+role: content_director
+goal: "Управление редакцией «Сила малых групп»: редакционные приоритеты, календарь, приёмка материалов, связь контента с бизнес-целями Проявленности"
+department: content
+system_instruction_ref: agents/prompts/editor-in-chief.md
+
+input_schema:
+  type: object
+  properties:
+    calendar_snapshot: { type: object }
+    backlog_ideas: { type: array }
+    performance_stats: { type: object }
+
+output_schema:
+  type: object
+  required: [priorities]
+  properties:
+    priorities: { type: array, items: { type: object, properties: { content_item_id: { type: string }, priority: { type: integer }, why: { type: string } } } }
+    calendar_changes: { type: array }
+    escalations: { type: array }
+
+skills: [editorial-management, prioritization, funnel-thinking]
+tools: [content.read_all, content.change_status, tasks.create, metrics.read, knowledge.read, router.call]
+permissions: [content.manage, knowledge.read.internal, tasks.create.content]
+model_policy:
+  task_type: decision_analysis
+  quality_required: standard
+budget: { monthly_usd: 40, per_task_usd: 1 }
+kpi:
+  - { metric: published_per_week, target: 3, period: week }
+  - { metric: leads_from_content, target: 5, period: month }
+  - { metric: assets_per_source, target: 3, period: month }
+reviewer: ai-ceo
+escalation_rule:
+  escalate_to: ai-ceo
+  conditions: [blocked_timeout, low_confidence]
+failure_conditions:
+  - "Материал ушёл в owner_review без content score"
+  - "Календарь пуст дольше 3 дней при наличии источников"

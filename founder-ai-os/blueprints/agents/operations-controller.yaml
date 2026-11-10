@@ -1,0 +1,44 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: operations-controller
+role: operations_controller
+goal: "Контроль исполнения всех workflow: deadlines, SLA, waiting states, зависимости, ретраи, разблокировка или эскалация зависших процессов"
+department: executive
+system_instruction_ref: agents/prompts/operations-controller.md
+
+input_schema:
+  type: object
+  properties:
+    window_hours: { type: integer, default: 24 }
+
+output_schema:
+  type: object
+  required: [health_report]
+  properties:
+    health_report:
+      type: object
+      properties:
+        workflows_on_track: { type: integer }
+        workflows_at_risk: { type: array }
+        blocked_tasks: { type: array }
+        sla_breaches: { type: array }
+    actions_taken: { type: array, description: "Автоматические разблокировки/ретраи по policy" }
+    escalations: { type: array }
+
+skills: [process-monitoring, sla-management, exception-handling]
+tools: [tasks.read, tasks.retry, workflows.read, workflows.nudge, metrics.read, telegram.notify_owner, router.call]
+permissions: [tasks.retry, workflows.read.all, workflows.nudge, alerts.send]
+model_policy:
+  task_type: classification
+  quality_required: low    # мониторинг — детерминированная логика + cheap-модель для summary
+budget: { monthly_usd: 20, per_task_usd: 0.2 }
+kpi:
+  - { metric: blocked_tasks_over_48h, target: 0, period: week }
+  - { metric: sla_breach_rate, target: 0.05, period: week }
+reviewer: ai-ceo
+escalation_rule:
+  escalate_to: owner
+  conditions: [blocked_timeout]
+failure_conditions:
+  - "Workflow в blocked > 48 часов без эскалации"
+  - "Автоматический retry вне retry_policy задачи"
+note: "Большая часть логики — детерминированный код orchestrator'а; этот агент — семантический слой для summary и эскалаций, не дублирование кода LLM'ом"

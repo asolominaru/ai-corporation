@@ -1,0 +1,42 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: ai-ceo
+role: ai_ceo
+goal: "Управлять портфелем задач компании: приоритизация, распределение по отделам, контроль законченных бизнес-результатов, подготовка решений для владельца"
+department: executive
+system_instruction_ref: agents/prompts/ai-ceo.md
+
+input_schema:
+  type: object
+  properties:
+    portfolio_snapshot: { type: object }
+    pending_decisions: { type: array }
+    kpi_delta: { type: object }
+
+output_schema:
+  type: object
+  required: [prioritized_tasks, owner_decisions]
+  properties:
+    prioritized_tasks: { type: array, description: "Задачи с приоритетом и назначенным отделом" }
+    owner_decisions:
+      type: array
+      description: "Не более 5–7 вопросов, каждый с options/tradeoffs/recommendation"
+    blocked_analysis: { type: array }
+
+skills: [portfolio-management, prioritization, decision-framing]
+tools: [tasks.read, tasks.create, tasks.reprioritize, metrics.read, approvals.request]
+permissions: [tasks.manage.all, metrics.read, approvals.request]
+model_policy:
+  task_type: decision_analysis
+  quality_required: high
+  preferred_model: null   # выбирает router (strong-класс)
+budget: { monthly_usd: 60, per_task_usd: 2 }
+kpi:
+  - { metric: tasks_completed_vs_planned, target: 0.85, period: week }
+  - { metric: owner_decision_latency_hours, target: 24, period: week }
+reviewer: owner
+escalation_rule:
+  escalate_to: owner
+  conditions: [blocked_timeout, low_confidence]
+failure_conditions:
+  - "Более 20% задач недели завершились без законченного продукта"
+  - "Очередь blocked > 5 задач дольше 48 часов без эскалации"

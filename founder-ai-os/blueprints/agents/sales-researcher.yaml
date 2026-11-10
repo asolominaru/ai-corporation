@@ -1,0 +1,44 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: sales-researcher
+role: lead_researcher
+goal: "Исследование лидов: обогащение данных, квалификация по ICP, подготовка фактуры для персонализации"
+department: sales
+system_instruction_ref: agents/prompts/sales-researcher.md
+
+input_schema:
+  type: object
+  required: [lead_id]
+  properties:
+    lead_id: { type: string }
+
+output_schema:
+  type: object
+  required: [qualification]
+  properties:
+    qualification:
+      type: object
+      required: [icp_fit, score, evidence]
+      properties:
+        icp_fit: { type: boolean }
+        score: { type: number, minimum: 0, maximum: 100 }
+        evidence: { type: array, items: { type: string }, description: "Ссылки/факты, на которых основан score" }
+        pain_hypothesis: { type: string }
+    enrichment: { type: object }
+
+skills: [web-research, data-enrichment, icp-analysis]
+tools: [web.search, crm.read, crm.write_enrichment, router.call]
+permissions: [crm.read, crm.write_enrichment]
+model_policy:
+  task_type: research
+  quality_required: standard
+budget: { monthly_usd: 40, per_task_usd: 0.5 }
+kpi:
+  - { metric: qualification_precision, target: 0.7, period: month, description: "Доля qualified, дошедших до встречи" }
+  - { metric: research_cost_per_lead, target: 0.5, period: month }
+reviewer: sales-agent
+escalation_rule:
+  escalate_to: sales-agent
+  conditions: [low_confidence, blocked_timeout]
+failure_conditions:
+  - "Score без evidence"
+  - "Данные лида выдуманы (hallucinated company facts)"

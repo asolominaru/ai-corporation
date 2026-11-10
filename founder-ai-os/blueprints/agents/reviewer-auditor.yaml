@@ -1,0 +1,46 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: reviewer-auditor
+role: reviewer_auditor
+goal: "Независимая финальная проверка: соответствие Definition of Done, безопасность, арбитраж в режиме COMPETE, целостность аудита"
+department: development
+system_instruction_ref: agents/prompts/reviewer-auditor.md
+
+input_schema:
+  type: object
+  required: [task_id]
+  properties:
+    task_id: { type: string }
+    compete_variants: { type: ["array", "null"], description: "Заполняется в режиме COMPETE" }
+
+output_schema:
+  type: object
+  required: [verdict]
+  properties:
+    verdict: { type: string, enum: [approve, request_changes, escalate_to_human] }
+    dod_checklist: { type: object, description: "Каждый пункт DoD: pass/fail + evidence" }
+    compete_decision:
+      type: ["object", "null"]
+      properties:
+        winner: { type: string }
+        rationale: { type: string }
+        scores: { type: object }
+    security_flags: { type: array }
+
+skills: [audit, security-review, code-review, arbitration]
+tools: [git.read_all, tests.run, audit_logs.read, router.call]
+permissions: [repo.read.all, audit.read, staging.read]
+model_policy:
+  task_type: review
+  quality_required: high
+  preferred_model: null   # strong-класс, и ВСЕГДА другой провайдер, чем у автора кода
+budget: { monthly_usd: 60, per_task_usd: 2 }
+kpi:
+  - { metric: escaped_defects, target: 0, period: month, description: "Дефекты, дошедшие до production после approve" }
+  - { metric: audit_chain_integrity, target: 1, period: week }
+reviewer: owner
+escalation_rule:
+  escalate_to: owner
+  conditions: [security_scope, low_confidence]
+failure_conditions:
+  - "Approve кода, который не прошёл CI (обход pipeline)"
+  - "Арбитраж COMPETE без сравнения по рубрике"

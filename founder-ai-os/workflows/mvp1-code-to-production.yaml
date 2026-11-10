@@ -1,0 +1,58 @@
+# Валидируется по schemas/workflow.schema.json
+code: mvp1-code-to-production
+name: "MVP-1: кодовая задача end-to-end до production"
+version: 1
+department: development
+trigger:
+  type: manual
+steps:
+  - id: cto_decompose
+    type: task
+    task_template: cto-decompose
+    assignee_role: ai_cto
+    sla_hours: 4
+  - id: implement
+    type: task
+    task_template: dev-implement
+    assignee_role: developer
+    depends_on: [cto_decompose]
+    # worktree, Codex/Claude по выбранному режиму
+  - id: cross_review
+    type: task
+    task_template: dev-cross-review
+    assignee_role: developer
+    depends_on: [implement]
+    # reviewer != автор; max 2 цикла rework
+  - id: ci
+    type: action
+    depends_on: [cross_review]
+    # lint, typecheck, unit, integration, build image
+    on_failure: fail_workflow
+  - id: staging
+    type: action
+    depends_on: [ci]
+    # deploy staging + e2e + healthcheck
+    on_failure: fail_workflow
+  - id: security_review
+    type: task
+    task_template: security-review
+    assignee_role: reviewer_auditor
+    depends_on: [staging]
+  - id: prod_approval
+    type: approval
+    approval_type: high_risk_deploy
+    depends_on: [security_review]
+    sla_hours: 8
+  - id: production
+    type: action
+    depends_on: [prod_approval]
+    # deploy-broker -> RU -> healthcheck; при fail — автоматический rollback + incident
+    on_failure: escalate
+done_definition:
+  description: "Функция работает на RU production, healthcheck зелёный, весь след в audit_logs, rollback проверен"
+  evidence:
+    - "deployments.status = 'success' с healthcheck_result = pass"
+    - "CI run зелёный, cross-review approve зафиксирован"
+    - "approval record high_risk_deploy approved"
+kpis: [release_success_rate, time_task_to_production]
+timeout_hours: 72

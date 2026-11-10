@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founder-ai-os/schemas/connector.schema.json",
+  "title": "Connector Manifest",
+  "type": "object",
+  "required": ["name", "version", "authentication", "actions", "data_scope", "audit_level"],
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "authentication": {
+      "type": "object",
+      "required": ["type", "secret_refs"],
+      "properties": {
+        "type": { "type": "string", "enum": ["oauth2", "api_key", "service_account", "ssh_key", "webhook_secret", "bot_token"] },
+        "secret_refs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ссылки на ключи в SOPS-файлах, напр. sops://spain/connectors#gmail_sa_key"
+        },
+        "scopes": { "type": "array", "items": { "type": "string" }, "default": [] }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "input_schema", "output_schema", "permission_required"],
+        "properties": {
+          "id": { "type": "string", "description": "напр. gmail.send, gdrive.read, telegram.notify" },
+          "description": { "type": "string" },
+          "input_schema": { "type": "object" },
+          "output_schema": { "type": "object" },
+          "permission_required": { "type": "string", "description": "Permission code, без которого action недоступен" },
+          "mutating": { "type": "boolean", "default": false, "description": "Мутирующие действия логируются с payload" },
+          "requires_approval": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "permissions_model": {
+      "type": "object",
+      "description": "Как connector выдаётся агентам: только явным назначением в agent.yaml + permission",
+      "properties": {
+        "auto_grant": { "type": "boolean", "const": false, "description": "Connector нельзя давать агенту автоматически — поле зафиксировано в false" }
+      }
+    },
+    "data_scope": {
+      "type": "object",
+      "required": ["privacy_class"],
+      "properties": {
+        "privacy_class": { "type": "string", "enum": ["public", "internal", "confidential"] },
+        "acl_tags": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "ru_data_residency": { "type": "boolean", "default": false, "description": "true = данные не покидают RU-контур" }
+      }
+    },
+    "rate_limits": {
+      "type": "object",
+      "properties": {
+        "requests_per_minute": { "type": "integer" },
+        "burst": { "type": "integer" }
+      },
+      "default": {}
+    },
+    "audit_level": { "type": "string", "enum": ["metadata", "full_payload"], "description": "full_payload — только для не-confidential" }
+  },
+  "additionalProperties": false
+}

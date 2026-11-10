@@ -1,0 +1,49 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: smg-writer
+role: writer
+goal: "Создание черновиков материалов редакции: структура, аргументация, методологическая точность, опора на добытые находки"
+department: content
+system_instruction_ref: agents/prompts/smg-writer.md
+
+input_schema:
+  type: object
+  required: [content_item_id, brief]
+  properties:
+    content_item_id: { type: string }
+    brief:
+      type: object
+      required: [theme, audience, product, funnel_stage, cta]
+      properties:
+        theme: { type: string }
+        audience: { type: string }
+        product: { type: string }
+        funnel_stage: { type: string }
+        cta: { type: string }
+        findings_refs: { type: array }
+
+output_schema:
+  type: object
+  required: [draft_ref]
+  properties:
+    draft_ref: { type: string }
+    used_sources: { type: array }
+    claims: { type: array, items: { type: string }, description: "Все проверяемые утверждения — вход для fact check" }
+
+skills: [longform-writing, methodology, argumentation]
+tools: [knowledge.read, content.write_draft, router.call]
+permissions: [knowledge.read.anonymized, content.write_draft]
+# Видит ТОЛЬКО обезличенную knowledge base. Никаких production DB, secrets, исходных транскриптов.
+model_policy:
+  task_type: writing
+  quality_required: high
+budget: { monthly_usd: 60, per_task_usd: 1.5 }
+kpi:
+  - { metric: drafts_passing_critic_first_try, target: 0.5, period: month }
+  - { metric: methodology_errors_found, target: 0, period: month }
+reviewer: anastasia-voice
+escalation_rule:
+  escalate_to: editor-in-chief
+  conditions: [rework_cycles_exceeded, blocked_timeout]
+failure_conditions:
+  - "Утверждение без источника в claims"
+  - "Выдуманная цитата или кейс"

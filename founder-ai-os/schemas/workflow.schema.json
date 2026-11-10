@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://founder-ai-os/schemas/workflow.schema.json",
+  "title": "Workflow Definition",
+  "type": "object",
+  "required": ["code", "name", "version", "trigger", "steps", "done_definition"],
+  "properties": {
+    "code": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string" },
+    "version": { "type": "integer", "minimum": 1 },
+    "department": { "type": "string" },
+    "trigger": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["event", "schedule", "manual", "task_completed"] },
+        "source": { "type": "string", "description": "connector code для event, cron для schedule" },
+        "filter": { "type": "object" }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string", "enum": ["task", "approval", "condition", "wait", "parallel", "action"] },
+          "task_template": { "type": "string", "description": "Для type=task: шаблон задачи" },
+          "assignee_role": { "type": "string" },
+          "depends_on": { "type": "array", "items": { "type": "string" }, "default": [] },
+          "condition": { "type": "object", "description": "Для type=condition: выражение над контекстом workflow" },
+          "wait_for": { "type": "object", "properties": { "duration": { "type": "string" }, "until_event": { "type": "string" } } },
+          "on_failure": { "type": "string", "enum": ["fail_workflow", "retry", "escalate", "skip"], "default": "escalate" },
+          "sla_hours": { "type": ["number", "null"], "default": null },
+          "approval_type": { "type": ["string", "null"], "default": null }
+        }
+      }
+    },
+    "done_definition": {
+      "type": "object",
+      "required": ["description", "evidence"],
+      "properties": {
+        "description": { "type": "string", "description": "Что является законченным бизнес-результатом, напр. оплаченная сделка или зафиксированный отказ" },
+        "evidence": { "type": "array", "items": { "type": "string" }, "description": "Машинно-проверяемые свидетельства: записи в БД, события, метрики" }
+      }
+    },
+    "kpis": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "timeout_hours": { "type": ["number", "null"], "default": null }
+  },
+  "additionalProperties": false
+}

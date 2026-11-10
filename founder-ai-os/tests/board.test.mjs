@@ -106,8 +106,22 @@ test('human_approval: accepted аудитором → pending_owner → approve 
   assert.equal(after1.status, 'pending_owner');
   assert.deepEqual(board.pendingOwner().map(x => x.id), ['TSK-013']);
   assert.throws(() => board.start('TSK-013'));
-  const final = board.approve('TSK-013', 'Согласовано, публикуем');
+  // K-11: approve без hash или с чужим hash отклоняется
+  assert.throws(() => board.approve('TSK-013', '0'.repeat(64), 'x'), /Устаревшее/);
+  const final = board.approve('TSK-013', after1.hash, 'Согласовано, публикуем');
   assert.equal(final.status, 'accepted');
+});
+
+test('K-11: подмена артефакта между review и approve обнаруживается', () => {
+  board.add({...base, id: 'TSK-015', human_approval: true});
+  board.start('TSK-015');
+  writeFileSync(resolve(root, 'outputs/r7.md'), 'версия на ревью');
+  const t = board.submit('TSK-015', 'outputs/r7.md');
+  const after1 = board.review('TSK-015', 'AUD', t.hash, 'accepted', 'ок');
+  assert.equal(after1.status, 'pending_owner');
+  writeFileSync(resolve(root, t.artifact), 'подмена после ревью');
+  assert.throws(() => board.approve('TSK-015', after1.hash, 'согласую'), /изменился/);
+  assert.equal(board.task('TSK-015').status, 'pending_owner'); // решение не принято
 });
 
 test('human_approval: reject владельца возвращает в changes_requested', () => {
@@ -116,7 +130,7 @@ test('human_approval: reject владельца возвращает в changes_
   writeFileSync(resolve(root, 'outputs/r5.md'), 'ещё одно изменение');
   const t = board.submit('TSK-014', 'outputs/r5.md');
   board.review('TSK-014', 'AUD', t.hash, 'accepted', 'ок');
-  const r = board.reject('TSK-014', 'Не сейчас, сначала страница группы');
+  const r = board.reject('TSK-014', t.hash, 'Не сейчас, сначала страница группы');
   assert.equal(r.status, 'changes_requested');
 });
 

@@ -1,0 +1,184 @@
+# Founder AI OS — Spain primary node (control plane)
+# Все порты — только внутренние docker-сети или tailnet. Наружу смотрит только caddy (443).
+name: founder-ai-os
+
+networks:
+  internal:        # postgres/redis — только здесь
+  proxy:           # caddy + публичные API
+  monitoring:
+
+volumes:
+  pgdata:
+  redis-data:
+  grafana-data:
+  loki-data:
+  prometheus-data:
+  n8n-data:
+  worktrees:       # git worktrees для agent-runner
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    networks: [internal]
+    environment:
+      POSTGRES_USER: ${PG_APP_USER}
+      POSTGRES_PASSWORD: ${PG_APP_PASSWORD}
+      POSTGRES_DB: ${PG_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_APP_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks: [internal]
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+
+  orchestrator:
+    image: ${REGISTRY}/orchestrator:${IMAGE_TAG}
+    restart: unless-stopped
+    networks: [internal, proxy, monitoring]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    environment:
+      DATABASE_URL: postgresql://${PG_APP_USER}:${PG_APP_PASSWORD}@postgres:5432/${PG_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      MODEL_ROUTER_URL: http://model-router:8100
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_OWNER_CHAT_ID: ${TELEGRAM_OWNER_CHAT_ID}
+      APPROVAL_HMAC_SECRET: ${APPROVAL_HMAC_SECRET}
+      DAILY_AI_BUDGET_USD: ${DAILY_AI_BUDGET_USD:-15}
+    # НЕ публикуем порт наружу — доступ через caddy
+
+  model-router:
+    image: ${REGISTRY}/model-router:${IMAGE_TAG}
+    restart: unless-stopped
+    networks: [internal]
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      DATABASE_URL: postgresql://${PG_APP_USER}:${PG_APP_PASSWORD}@postgres:5432/${PG_DB}
+      REGISTRY_CONFIG: /config/models.yaml
+    volumes:
+      - ./models:/config:ro
+
+  knowledge:
+    image: ${REGISTRY}/knowledge:${IMAGE_TAG}
+    restart: unless-stopped
+    networks: [internal]
+    depends_on: [postgres]
+    environment:
+      DATABASE_URL: postgresql://${PG_APP_USER}:${PG_APP_PASSWORD}@postgres:5432/${PG_DB}
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    networks: [internal, proxy]
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      WEBHOOK_URL: https://hooks.${DOMAIN}/
+      ORCHESTRATOR_URL: http://orchestrator:8000
+      # n8n НЕ имеет доступа к postgres — только к orchestrator API
+    volumes: [n8n-data:/home/node/.n8n]
+
+  agent-runner:
+    image: ${REGISTRY}/agent-runner:${IMAGE_TAG}
+    restart: unless-stopped
+    networks: [internal]
+    depends_on: [orchestrator]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs: [/tmp:size=2g]
+    volumes:
+      - worktrees:/srv/worktrees
+      - ./agent-runner/egress-allowlist.txt:/config/egress-allowlist.txt:ro
+    environment:
+      ORCHESTRATOR_URL: http://orchestrator:8000
+      GIT_REMOTE: ${GIT_REMOTE}
+      # LLM-ключей здесь НЕТ — агенты вызывают model-router через orchestrator
+
+  deploy-broker:
+    image: ${REGISTRY}/deploy-broker:${IMAGE_TAG}
+    restart: unless-stopped
+    networks: [internal]
+    volumes:
+      - ${DEPLOY_SSH_KEY_PATH}:/keys/deploy_ai:ro
+    environment:
+      RU_NODE: deploy-ai@ru-node.tailnet
+      ALLOWED_COMMANDS: "deploy rollback healthcheck"
+
+  restic:
+    image: restic/restic:latest
+    restart: "no"
+    networks: [internal]
+    profiles: [backup]
+    volumes:
+      - pgdata:/backup/pgdata:ro
+    environment:
+      RESTIC_REPOSITORY: ${RESTIC_REPOSITORY}
+      RESTIC_PASSWORD: ${RESTIC_PASSWORD}
+      AWS_ACCESS_KEY_ID: ${B2_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${B2_APPLICATION_KEY}
+    entrypoint: ["/bin/sh", "/scripts/backup.sh"]
+    # Запуск по cron с хоста: docker compose run --rm restic
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    networks: [proxy]
+    ports:
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    networks: [monitoring, internal]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+
+  loki:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    networks: [monitoring]
+    volumes: [loki-data:/loki]
+
+  promtail:
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    networks: [monitoring]
+    volumes:
+      - /var/log:/var/log:ro
+      - ./monitoring/promtail.yml:/etc/promtail/config.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    networks: [monitoring, proxy]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    volumes: [grafana-data:/var/lib/grafana]
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    restart: unless-stopped
+    networks: [monitoring]
+
+volumes:
+  caddy-data:

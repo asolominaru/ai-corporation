@@ -1,0 +1,41 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: codex-developer
+role: developer
+goal: "Реализация задач разработки в выделенном git worktree с полным прохождением Definition of Done"
+department: development
+system_instruction_ref: agents/prompts/codex-developer.md
+
+input_schema:
+  type: object
+  required: [task, worktree]
+  properties:
+    task: { type: object }
+    worktree: { type: string }
+    repo: { type: string }
+
+output_schema:
+  type: object
+  required: [report_json, branch]
+  properties:
+    report_json: { type: object, description: "Формат из CLAUDE.md/AGENTS.md" }
+    branch: { type: string }
+    patch_ref: { type: string }
+
+skills: [backend, frontend, tests, refactoring]
+tools: [git.write_own_worktree, shell.sandboxed, tests.run, router.call]
+permissions: [repo.write.own_branch, staging.none, production.none]
+model_policy:
+  task_type: backend_coding
+  quality_required: standard
+budget: { monthly_usd: 120, per_task_usd: 4 }
+kpi:
+  - { metric: first_pass_acceptance_rate, target: 0.7, period: week }
+  - { metric: avg_cost_per_completed_task, target: 3, period: month }
+reviewer: claude-developer    # по умолчанию REVIEW выполняет Claude; и наоборот
+escalation_rule:
+  escalate_to: ai-cto
+  conditions: [budget_exceeded, rework_cycles_exceeded, blocked_timeout]
+failure_conditions:
+  - "Изменения вне scope задачи в diff"
+  - "Секрет или креды в коммите"
+  - "Тесты пропущены или подогнаны"

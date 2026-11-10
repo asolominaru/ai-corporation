@@ -1,0 +1,109 @@
+# BLUEPRINT: founder-company (первый tenant)
+# Валидируется по schemas/blueprint.schema.json
+blueprint_code: founder-company
+name: Founder Company (7 контуров)
+version: "0.3"
+
+business_units:
+  - { code: personal-brand, name: "Личный бренд / Анастасия" }
+  - { code: proyavlennost, name: "Проявленность" }
+  - { code: yardniki, name: "Ярдники" }
+  - { code: vforume, name: "ВФОРУМЕ" }
+  - { code: rnd-lab, name: "R&D / Startup Lab" }
+  - { code: ai-learning, name: "Обучение ИИ" }
+  - { code: brandfactory, name: "BrandFactory" }
+  # Слияние карт: решение владельца 06.11.2026 (approval feb7741b):
+  # 5 контуров blueprint + Обучение ИИ и BrandFactory из config/company.json
+
+departments:
+  - code: content
+    name: "Редакция «Сила малых групп» (Content & Growth)"
+    business_unit: proyavlennost
+    done_definition: "Опубликованный качественный материал с карточкой (source, theme, audience, product, funnel_stage, CTA) и измеренными leads/meetings/pipeline; материал сохранён в Knowledge Base"
+    default_kpi: [published_per_week, leads_from_content, assets_per_source, voice_match_score]
+  - code: development
+    name: Development Department
+    business_unit: vforume
+    done_definition: "Работающий релиз: acceptance criteria, тесты, staging, healthcheck, rollback, changelog, audit"
+    default_kpi: [release_success_rate, failed_tests_count, incidents_count]
+  - code: sales
+    name: Sales Department
+    business_unit: proyavlennost
+    done_definition: "Оплаченная сделка ИЛИ зафиксированный отказ (reason, next_contact_date, probability)"
+    default_kpi: [deals_won, pipeline_value, followup_sla]
+  - code: security
+    name: Security Center
+    business_unit: personal-brand
+    done_definition: "Горизонтальный контроль: weekly security report + немедленные critical alerts; ни одного необъяснённого инцидента"
+    default_kpi: [critical_alert_latency_minutes, unresolved_high_findings_over_14d]
+  - code: finance
+    name: Finance Department
+    business_unit: personal-brand
+    done_definition: "Financial Decision System: P&L по BU, 13-недельный cash flow, kill rules срабатывают, 11 вопросов получают ответ из данных"
+    default_kpi: [forecast_accuracy, cash_runway_weeks, founder_attention_roi]
+    # агенты подключаются: finance-lite в P2, полный отдел в P5
+  - code: customer-intelligence
+    name: Customer & Market Intelligence
+    business_unit: proyavlennost
+    done_definition: "Доказанные insights (evidence_level=pattern) с willingness_to_pay — до любых marketing/sales задач"
+    default_kpi: [pattern_insights_per_month, wtp_evidence_coverage]
+  - code: marketing
+    name: Marketing Department
+    business_unit: proyavlennost
+    done_definition: "Qualified demand: leads, meetings, pipeline, revenue с атрибуцией в CRM — не охваты и не посты"
+    default_kpi: [qualified_leads, cac, pipeline_from_marketing]
+  - code: executive
+    name: Executive
+    business_unit: personal-brand
+    done_definition: "Принятое решение с зафиксированными assumptions и evidence; weekly decision pack без остатка 'в тексте'"
+    default_kpi: [decisions_closed, decision_latency_hours]
+
+agents:
+  # P0/P4 — ядро и разработка
+  - { agent_ref: agents/ai-ceo.yaml,                department: executive }
+  - { agent_ref: agents/ai-cto.yaml,                department: development }
+  - { agent_ref: agents/codex-developer.yaml,       department: development }
+  - { agent_ref: agents/claude-developer.yaml,      department: development }
+  - { agent_ref: agents/reviewer-auditor.yaml,      department: development }
+  - { agent_ref: agents/operations-controller.yaml, department: executive }
+  # P1 — редакция «Сила малых групп»
+  - { agent_ref: agents/editor-in-chief.yaml,          department: content }
+  - { agent_ref: agents/knowledge-miner.yaml,          department: content }
+  - { agent_ref: agents/smg-writer.yaml,               department: content }
+  - { agent_ref: agents/anastasia-voice.yaml,          department: content }
+  - { agent_ref: agents/quality-critic.yaml,           department: content }
+  - { agent_ref: agents/confidentiality-reviewer.yaml, department: content }
+  - { agent_ref: agents/distribution-growth.yaml,      department: content }
+  # Security (горизонтальный контур, не подчинён development)
+  - { agent_ref: agents/ai-ciso.yaml,               department: security }
+  # P3 — продажи
+  - { agent_ref: agents/sales-researcher.yaml,      department: sales }
+  - { agent_ref: agents/sales-agent.yaml,           department: sales }
+
+workflows:
+  - { workflow_ref: workflows/editorial-pipeline.yaml,        enabled: true }   # P1
+  - { workflow_ref: workflows/weekly-executive-meeting.yaml,  enabled: true }   # управленческий ритм
+  - { workflow_ref: workflows/mvp1-code-to-production.yaml,   enabled: true }   # P4
+  - { workflow_ref: workflows/mvp2-lead-to-deal.yaml,         enabled: false }  # P3, включается с Sales
+
+connectors:
+  - { connector: telegram, enabled: true }
+  - { connector: github,   enabled: true }
+  - { connector: gdrive,   enabled: true }    # P1: источник редакции
+  - { connector: gmail,    enabled: false }   # P3
+
+dashboards:
+  - code: ceo
+    blocks: [ai_company, decisions_required, content, development, operations]
+    # revenue/product/rnd включаются по мере появления данных; GREY лучше пустого блока
+
+approval_policies:
+  - { trigger: payment,          approver: owner, expires_hours: 24, require_confirmation_phrase: true }
+  - { trigger: contract,         approver: owner, expires_hours: 48 }
+  - { trigger: destructive_db,   approver: owner, expires_hours: 12, require_confirmation_phrase: true }
+  - { trigger: dns,              approver: owner, expires_hours: 12 }
+  - { trigger: auth_change,      approver: owner, expires_hours: 24 }
+  - { trigger: secrets,          approver: owner, expires_hours: 12 }
+  - { trigger: data_deletion,    approver: owner, expires_hours: 24, require_confirmation_phrase: true }
+  - { trigger: high_risk_deploy, approver: owner, expires_hours: 8 }
+  - { trigger: public_statement, approver: owner, expires_hours: 72 }

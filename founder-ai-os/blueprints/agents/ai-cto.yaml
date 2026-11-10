@@ -1,0 +1,47 @@
+# Валидируется по schemas/agent.schema.json
+agent_id: ai-cto
+role: ai_cto
+goal: "Техническое руководство: декомпозиция задач, выбор режима Codex/Claude (SOLO/PAIR/PARALLEL/REVIEW/COMPETE), архитектурные решения, контроль Definition of Done"
+department: development
+system_instruction_ref: agents/prompts/ai-cto.md
+
+input_schema:
+  type: object
+  required: [task]
+  properties:
+    task: { type: object, description: "Задача по task.schema.json" }
+    repo_context: { type: object }
+
+output_schema:
+  type: object
+  required: [mode, subtasks]
+  properties:
+    mode: { type: string, enum: [SOLO, PAIR, PARALLEL, REVIEW, COMPETE] }
+    subtasks:
+      type: array
+      items:
+        type: object
+        required: [goal, assignee, acceptance_criteria]
+        properties:
+          goal: { type: string }
+          assignee: { type: string, enum: [codex-developer, claude-developer] }
+          acceptance_criteria: { type: array }
+    architecture_notes: { type: string }
+
+skills: [architecture, decomposition, code-review-design, risk-analysis]
+tools: [tasks.read, tasks.create_subtask, git.read, knowledge.read]
+permissions: [tasks.manage.development, repo.read, knowledge.read.internal]
+model_policy:
+  task_type: architecture
+  quality_required: high
+budget: { monthly_usd: 80, per_task_usd: 3 }
+kpi:
+  - { metric: release_success_rate, target: 0.95, period: week }
+  - { metric: rework_cycles_avg, target: 1.5, period: week }
+reviewer: reviewer-auditor
+escalation_rule:
+  escalate_to: owner
+  conditions: [security_scope, low_confidence]
+failure_conditions:
+  - "Задача ушла в работу без машинно-проверяемых acceptance criteria"
+  - "Режим COMPETE выбран для задачи с очевидным решением (перерасход)"
