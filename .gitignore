@@ -10,3 +10,13 @@ __pycache__/
 
 # системное
 .DS_Store
+
+# VPN-инфраструктура: приватные ключи, UUID, адреса серверов — никогда в git
+spain-vpn/
+
+# approval-bot: рантайм-состояние и аудит — только локально
+approval-bot/state.json
+approval-bot/approvals.jsonl
+approval-bot/requests.json
+approval-bot/requests.json.lock
+approval-bot/poll.log
