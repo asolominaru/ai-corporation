@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "app: dev (Vite)",
+      "type": "npm",
+      "script": "dev",
+      "path": "app",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "reveal": "always" },
+      "group": { "kind": "build", "isDefault": false }
+    },
+    {
+      "label": "app: build",
+      "type": "npm",
+      "script": "build",
+      "path": "app",
+      "problemMatcher": ["$tsc"],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "app: lint",
+      "type": "npm",
+      "script": "lint",
+      "path": "app",
+      "problemMatcher": ["$eslint-stylish"],
+      "group": "test"
+    },
+    {
+      "label": "litellm: start gateway :4000",
+      "type": "shell",
+      "command": "./start.sh",
+      "options": { "cwd": "${workspaceFolder}/litellm-server" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated" }
+    },
+    {
+      "label": "approval-bot: offline tests",
+      "type": "shell",
+      "command": "${workspaceFolder}/litellm-server/venv/bin/python test_approvals.py",
+      "options": { "cwd": "${workspaceFolder}/approval-bot" },
+      "problemMatcher": [],
+      "group": { "kind": "test", "isDefault": true }
+    }
+  ]
+}

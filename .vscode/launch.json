@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "App: Chrome debug",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/app/src",
+      "sourceMaps": true,
+      "preLaunchTask": "app: dev (Vite)"
+    },
+    {
+      "name": "Python: approval-bot tests",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/approval-bot/test_approvals.py",
+      "cwd": "${workspaceFolder}/approval-bot",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Python: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  // --- Файлы и поиск: прячем шум ---
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.DS_Store": true,
+    "app/node_modules": true,
+    "app/dist": true,
+    "litellm-server/venv": true,
+    "spain-vpn/xray-bin": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/venv": true,
+    "**/package-lock.json": true,
+    "**/*.log": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/venv/**": true,
+    "**/.git/objects/**": true
+  },
+
+  // --- Ассоциации ---
+  "files.associations": {
+    "*.jsonl": "jsonl",
+    "**/litellm-server/config.yaml": "yaml"
+  },
+
+  // --- Редактор ---
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "editor.rulers": [100],
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.rulers": [100]
+  },
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.wordWrap": "on"
+  },
+
+  // --- TypeScript / React (app/) ---
+  "typescript.tsdk": "app/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "eslint.workingDirectories": [{ "pattern": "app" }],
+  "tailwindCSS.experimental.configFile": "app/tailwind.config.js",
+
+  // --- Python ---
+  "python.defaultInterpreterPath": "${workspaceFolder}/litellm-server/venv/bin/python",
+  "python.testing.unittestEnabled": true,
+  "python.testing.pytestEnabled": false,
+  "python.testing.cwd": "${workspaceFolder}/approval-bot",
+
+  // --- Терминал ---
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.scrollback": 5000,
+
+  // --- Copilot ---
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "yaml": true
+  },
+
+  // --- Git ---
+  "git.ignoreLimitWarning": true,
+  "git.autofetch": true
+}
